@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Grammar Admin</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.back{
+display:inline-block;
+margin:20px;
+padding:10px 20px;
+background:#ffffff22;
+color:white;
+text-decoration:none;
+border-radius:10px;
+transition:0.3s;
+}
+
+.back:hover{
+background:#ffffff44;
+}
+
+.admin-card{
+background:#ffffff10;
+padding:20px;
+border-radius:20px;
+margin-top:20px;
+backdrop-filter:blur(5px);
+}
+
+.admin-card input,
+.admin-card select,
+.admin-card textarea{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:none;
+border-radius:10px;
+outline:none;
+font-size:16px;
+}
+
+.admin-card button{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:16px;
+margin-right:10px;
+transition:0.3s;
+}
+
+.addBtn{
+background:#00b894;
+color:white;
+}
+
+.addBtn:hover{
+transform:scale(1.03);
+}
+
+.question-box{
+background:#ffffff15;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+}
+
+.status{
+margin-top:10px;
+margin-bottom:10px;
+font-weight:bold;
+}
+
+.toggleBtn{
+background:#0984e3;
+color:white;
+}
+
+.deleteBtn{
+background:#d63031;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+  <body class="grammar-admin"></body>
+
+<a href="savollar-paneli.html" class="back">⬅ Bosh sahifa</a>
+
+<div class="box admin-card">
+
+<h2>GRAMMATIKA SAVOLLARI</h2>
+<div id="grammarAdminPanel"></div>
+
+<!-- TYPE TANLASH -->
+<select id="type" onchange="changeForm()">
+  <option value="grammar">Grammar (A/B/C/D)</option>
+  <option value="analysis">Tahliliy (yozish)</option>
+</select>
+
+<!-- SAVOL -->
+<input type="text" id="question" placeholder="Savol">
+
+<!-- 🔥 GRAMMAR VARIANTLAR -->
+<div id="grammarBox">
+
+<input type="text" id="a" placeholder="Variant A">
+<input type="text" id="b" placeholder="Variant B">
+<input type="text" id="c" placeholder="Variant C">
+<input type="text" id="d" placeholder="Variant D">
+
+</div>
+
+<!-- 🔥 ANALYSIS BOX -->
+<div id="analysisBox" style="display:none;">
+<textarea id="answer" placeholder="Yoziladigan javob"></textarea>
+</div>
+
+<button class="addBtn" onclick="addQuestion()">
+Savol qo'shish
+</button>
+
+<br><br>
+
+<div id="questionsList"></div>
+
+</div>
+
+<script>
+
+let questions =
+JSON.parse(localStorage.getItem("grammarQuestions")) || [];
+
+renderQuestions();
+
+/* ================= FORM SWITCH ================= */
+
+function changeForm(){
+
+const type = document.getElementById("type").value;
+
+if(type === "grammar"){
+  document.getElementById("grammarBox").style.display = "block";
+  document.getElementById("analysisBox").style.display = "none";
+} else {
+  document.getElementById("grammarBox").style.display = "none";
+  document.getElementById("analysisBox").style.display = "block";
+}
+
+}
+
+/* ================= ADD QUESTION ================= */
+
+function addQuestion(){
+
+const type = document.getElementById("type").value;
+const question = document.getElementById("question").value;
+
+let newQuestion = {
+  question,
+  type,
+  active: true
+};
+
+if(type === "grammar"){
+
+  const a = document.getElementById("a").value;
+  const b = document.getElementById("b").value;
+  const c = document.getElementById("c").value;
+  const d = document.getElementById("d").value;
+
+  newQuestion.options = [a,b,c,d];
+
+} else {
+
+  const answer = document.getElementById("answer").value;
+
+  newQuestion.answer = answer;
+
+}
+
+questions.push(newQuestion);
+
+localStorage.setItem(
+"grammarQuestions",
+JSON.stringify(questions)
+);
+
+renderQuestions();
+clearInputs();
+}
+
+/* ================= CLEAR ================= */
+
+function clearInputs(){
+
+document.getElementById("question").value = "";
+
+document.getElementById("a").value = "";
+document.getElementById("b").value = "";
+document.getElementById("c").value = "";
+document.getElementById("d").value = "";
+
+document.getElementById("answer").value = "";
+}
+
+/* ================= RENDER ================= */
+
+function renderQuestions(){
+
+const list = document.getElementById("questionsList");
+
+list.innerHTML = "";
+
+questions.forEach((q,index)=>{
+
+list.innerHTML += `
+<div class="question-box">
+
+<h3>${q.question}</h3>
+
+<p>Type: <b>${q.type}</b></p>
+
+<p class="status">
+${q.active ? "✅ Aktiv" : "⛔ To'xtatilgan"}
+</p>
+
+<button class="toggleBtn" onclick="toggleQuestion(${index})">
+${q.active ? "To'xtatish" : "Faollashtirish"}
+</button>
+
+<button class="deleteBtn" onclick="deleteQuestion(${index})">
+O‘chirish
+</button>
+
+</div>
+`;
+
+});
+
+}
+
+/* ================= TOGGLE ================= */
+
+function toggleQuestion(index){
+
+questions[index].active = !questions[index].active;
+
+localStorage.setItem(
+"grammarQuestions",
+JSON.stringify(questions)
+);
+
+renderQuestions();
+}
+
+/* ================= DELETE ================= */
+
+function deleteQuestion(index){
+
+questions.splice(index,1);
+
+localStorage.setItem(
+"grammarQuestions",
+JSON.stringify(questions)
+);
+
+renderQuestions();
+}
+
+</script>
+
+</body>
+</html>

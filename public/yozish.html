@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Yozish Test</title>
+
+<link rel="stylesheet" href="style.css">
+<base target="_blank">
+<base target="_blank">
+</head>
+
+<body>
+
+<a class="back" href="index.html" onclick="event.preventDefault(); window.location.assign('index.html');">⬅ Bosh sahifa</a>
+
+<div id="globalTimer"></div>
+
+<div class="box" id="screen">
+
+  <!-- START -->
+  <div id="startScreen">
+    <h2>YOZISH TEST</h2>
+    <button class="btn" onclick="start()">Boshlash</button>
+  </div>
+
+  <!-- WRITING -->
+  <div id="writingScreen" style="display:none; flex-direction:column; gap:15px; width:100%;">
+
+    <div id="topic"></div>
+
+    <textarea id="essay" placeholder="Bu yerga yozing..."></textarea>
+
+    <button class="btn" onclick="nextEssay()">Keyingi</button>
+
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+<!-- JS -->
+<script src="finish.js"></script>
+<script src="yozish.js"></script>
+<script src="script.js"></script>
+
+<script>
+window.onload = function () {
+  if (typeof startSharedTimer === "function") {
+    startSharedTimer();
+  }
+};
+</script>
+
+
+<script>
+// Auto-detect text direction for textarea
+(function() {
+  var essay = document.getElementById('essay');
+  if (!essay) return;
+
+  // Arabic Unicode range (including extended Arabic)
+  var arabicRegex = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
+  function checkDirection() {
+    var text = essay.value;
+    // Check if text contains any Arabic character
+    if (arabicRegex.test(text)) {
+      essay.style.direction = 'rtl';
+      essay.style.textAlign = 'right';
+    } else {
+      essay.style.direction = 'ltr';
+      essay.style.textAlign = 'left';
+    }
+  }
+
+  essay.addEventListener('input', checkDirection);
+  essay.addEventListener('keyup', checkDirection);
+  essay.addEventListener('paste', function() {
+    setTimeout(checkDirection, 0);
+  });
+})();
+</script>
+
+</body>
+</html>

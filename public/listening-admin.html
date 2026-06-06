@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Listening Admin</title>
+
+<style>
+
+/* BODY */
+body{
+margin:0;
+font-family:Arial;
+background:#0f2027;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+color:white;
+position:relative;
+}
+
+/* BACK BUTTON */
+.back{
+position:absolute;
+top:15px;
+left:15px;
+padding:10px 20px;
+background:#ffffff22;
+color:white;
+text-decoration:none;
+border-radius:10px;
+transition:0.3s;
+}
+
+.back:hover{
+background:#ffffff44;
+}
+
+/* BOX */
+.box{
+width:750px;
+background:#203a43;
+padding:20px;
+border-radius:15px;
+}
+
+/* INPUT */
+input,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+outline:none;
+}
+
+/* QUESTION */
+.question{
+background:#2c5364;
+padding:10px;
+margin-top:10px;
+border-radius:10px;
+}
+
+/* BUTTON */
+button{
+width:100%;
+margin-top:10px;
+padding:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+.save{
+background:white;
+color:black;
+}
+
+/* ITEM */
+.item{
+background:#1b2d36;
+padding:15px;
+margin-top:15px;
+border-radius:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- 🔙 BACK BUTTON (SAVOLLARGA QAYTADI) -->
+<a href="savollar-paneli.html" class="back">Bosh sahifa</a>
+
+<div class="box">
+
+<h2>🎧 LISTENING ADMIN</h2>
+
+<!-- QISM -->
+<select id="section">
+<option value="easy">Oson</option>
+<option value="medium">O‘rtacha</option>
+<option value="hard">Qiyin</option>
+</select>
+
+<!-- AUDIO -->
+<input id="audio" placeholder="Audio link kiriting">
+
+<!-- SAVOLLAR SHU YERDA -->
+<div id="questions"></div>
+
+<!-- SAQLASH -->
+<button class="save" onclick="addListening()">
+Saqlash
+</button>
+
+<!-- CHIQARISH -->
+<div id="list"></div>
+
+</div>
+
+<script src="listening-admin.js"></script>
+
+</body>
+</html>

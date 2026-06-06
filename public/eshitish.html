@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Eshitish Test</title>
+
+<style>
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  color:white;
+}
+
+.back{
+  position:fixed;
+  top:15px;
+  left:15px;
+  padding:10px 14px;
+  background:rgba(255,255,255,0.15);
+  border-radius:10px;
+  color:white;
+  text-decoration:none;
+}
+
+#globalTimer{
+  position:fixed;
+  top:15px;
+  right:15px;
+  padding:10px 14px;
+  background:rgba(0,0,0,0.4);
+  border-radius:10px;
+  color:#00ffcc;
+  font-weight:bold;
+}
+
+/* 🔥 kichikroq container */
+.box{
+  width:100%;
+  max-width:850px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(15px);
+  border-radius:22px;
+  padding:40px;
+  text-align:center;
+}
+
+/* title */
+h2{
+  font-size:30px;
+  margin-bottom:15px;
+}
+
+/* audio */
+audio{
+  width:100%;
+  margin-top:10px;
+}
+
+/* play icon hide */
+audio::-webkit-media-controls-play-button{
+  display:none !important;
+}
+
+/* button */
+.btn{
+  margin-top:20px;
+  width:100%;
+  padding:16px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  background:#00b894;
+  color:white;
+  cursor:pointer;
+}
+
+.btn:hover{
+  background:#00a383;
+}
+
+/* quiz */
+#quiz{
+  margin-top:25px;
+  text-align:left;
+}
+
+.question-box{
+  padding:22px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.08);
+}
+
+.q-title{
+  font-size:22px;
+  margin-bottom:15px;
+}
+
+/* options */
+.options{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.option-btn{
+  padding:16px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  background:rgba(255,255,255,0.12);
+  color:white;
+  text-align:left;
+  cursor:pointer;
+}
+
+.option-btn:hover{
+  background:rgba(255,255,255,0.25);
+  transform:scale(1.02);
+}
+
+/* submit */
+#submitAllBtn{
+  margin-top:20px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#0984e3;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+}
+
+#submitAllBtn:hover{
+  background:#0873c4;
+}
+
+.result{
+  font-size:26px;
+  text-align:center;
+}
+
+</style>
+</head>
+
+<body>
+
+<a class="back" href="index.html">⬅ Bosh sahifa</a>
+
+<div id="globalTimer"></div>
+
+<div class="box">
+
+  <h2>LISTENING TEST</h2>
+
+  <audio id="audio" controls></audio>
+
+  <button class="btn" id="startBtn">Boshlash</button>
+
+  <div id="quiz" style="display:none;"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="script.js"></script>
+<script src="finish.js"></script>
+<script src="eshitish.js"></script>
+
+<script>
+window.addEventListener("load", function() {
+  if (typeof startExamTimer === "function") { startExamTimer(); }
+});
+</script>
+</body>
+</html>

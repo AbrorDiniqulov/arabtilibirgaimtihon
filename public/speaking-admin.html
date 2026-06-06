@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Speaking Admin</title>
+
+<style>
+
+/* BACK */
+.back{
+display:inline-block;
+margin:20px;
+padding:10px 20px;
+background:#ffffff22;
+color:white;
+text-decoration:none;
+border-radius:10px;
+transition:0.3s;
+}
+
+.back:hover{
+background:#ffffff44;
+}
+
+/* CARD */
+.admin-card{
+background:#ffffff10;
+padding:20px;
+border-radius:20px;
+margin-top:20px;
+backdrop-filter:blur(5px);
+max-width:700px;
+margin-left:auto;
+margin-right:auto;
+}
+
+/* INPUTS */
+.admin-card input,
+.admin-card select,
+.admin-card textarea{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:none;
+border-radius:10px;
+outline:none;
+font-size:16px;
+}
+
+/* BUTTONS */
+.admin-card button{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:16px;
+margin-right:10px;
+transition:0.3s;
+}
+
+.addBtn{
+background:#00b894;
+color:white;
+}
+
+.addBtn:hover{
+transform:scale(1.03);
+}
+
+/* LIST */
+.question-box{
+background:#ffffff15;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+}
+
+.status{
+margin-top:10px;
+margin-bottom:10px;
+font-weight:bold;
+}
+
+.toggleBtn{
+background:#0984e3;
+color:white;
+}
+
+.deleteBtn{
+background:#d63031;
+color:white;
+}
+
+</style>
+</head>
+
+<body style="background:#0f2027;color:white;font-family:Arial;">
+
+<!-- 🔙 BACK BUTTON (SAVOLLARGA QAYTADI) -->
+
+<a href="savollar-paneli.html" class="back">Bosh sahifa</a>
+
+<div class="admin-card">
+
+<h2>SPEAKING SAVOLLARI</h2>
+
+<!-- DIFFICULTY -->
+<select id="difficulty">
+  <option value="easy">Easy</option>
+  <option value="medium">Medium</option>
+  <option value="hard">Hard</option>
+</select>
+
+<!-- QUESTION -->
+<textarea id="question" placeholder="Speaking savolni yozing"></textarea>
+
+<button class="addBtn" onclick="addQuestion()">
+Savol qo'shish
+</button>
+
+<br><br>
+
+<div id="questionsList"></div>
+
+</div>
+
+<script>
+
+let questions =
+JSON.parse(localStorage.getItem("speakingQuestions")) || [];
+
+renderQuestions();
+
+/* ================= ADD ================= */
+
+function addQuestion(){
+
+const question = document.getElementById("question").value;
+const difficulty = document.getElementById("difficulty").value;
+
+let timer = {
+  prep: 10,
+  answer: 30
+};
+
+if(difficulty === "medium"){
+  timer = { prep: 10, answer: 45 };
+}
+
+if(difficulty === "hard"){
+  timer = { prep: 15, answer: 60 };
+}
+
+const newQuestion = {
+  question,
+  difficulty,
+  timer,
+  active: true
+};
+
+questions.push(newQuestion);
+
+localStorage.setItem(
+"speakingQuestions",
+JSON.stringify(questions)
+);
+
+renderQuestions();
+clearInputs();
+}
+
+/* ================= CLEAR ================= */
+
+function clearInputs(){
+document.getElementById("question").value = "";
+}
+
+/* ================= SORT ================= */
+
+function sortQuestions(){
+const order = { easy: 1, medium: 2, hard: 3 };
+
+questions.sort((a,b)=>{
+return order[a.difficulty] - order[b.difficulty];
+});
+}
+
+/* ================= RENDER ================= */
+
+function renderQuestions(){
+
+const list = document.getElementById("questionsList");
+list.innerHTML = "";
+
+sortQuestions();
+
+questions.forEach((q,index)=>{
+
+list.innerHTML += `
+<div class="question-box">
+
+<h3>${q.question}</h3>
+
+<p>Level: <b>${q.difficulty.toUpperCase()}</b></p>
+
+<p>⏱ Prep: ${q.timer.prep}s | 🗣 Answer: ${q.timer.answer}s</p>
+
+<p class="status">
+${q.active ? "✅ Aktiv" : "⛔ To'xtatilgan"}
+</p>
+
+<button class="toggleBtn" onclick="toggleQuestion(${index})">
+${q.active ? "To'xtatish" : "Faollashtirish"}
+</button>
+
+<button class="deleteBtn" onclick="deleteQuestion(${index})">
+O‘chirish
+</button>
+
+</div>
+`;
+});
+
+}
+
+/* ================= TOGGLE ================= */
+
+function toggleQuestion(index){
+
+questions[index].active = !questions[index].active;
+
+localStorage.setItem(
+"speakingQuestions",
+JSON.stringify(questions)
+);
+
+renderQuestions();
+}
+
+/* ================= DELETE ================= */
+
+function deleteQuestion(index){
+
+questions.splice(index,1);
+
+localStorage.setItem(
+"speakingQuestions",
+JSON.stringify(questions)
+);
+
+renderQuestions();
+}
+
+</script>
+
+</body>
+</html>

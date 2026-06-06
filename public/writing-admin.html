@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Writing Admin</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#0f2027;
+color:white;
+}
+
+.back{
+display:inline-block;
+margin:20px;
+padding:10px 20px;
+background:#ffffff22;
+color:white;
+text-decoration:none;
+border-radius:10px;
+transition:0.3s;
+}
+
+.back:hover{
+background:#ffffff44;
+}
+
+.admin-card{
+background:#ffffff10;
+padding:20px;
+border-radius:20px;
+margin:20px auto;
+max-width:800px;
+backdrop-filter:blur(5px);
+}
+
+input, select, textarea{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:none;
+border-radius:10px;
+outline:none;
+font-size:16px;
+}
+
+textarea{
+min-height:120px;
+resize:none;
+}
+
+button{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin-right:10px;
+transition:0.3s;
+}
+
+.addBtn{
+background:#00b894;
+color:white;
+}
+
+.addBtn:hover{
+transform:scale(1.03);
+}
+
+.box{
+background:#ffffff15;
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+}
+
+.status{
+margin:10px 0;
+font-weight:bold;
+}
+
+.toggleBtn{
+background:#0984e3;
+color:white;
+}
+
+.deleteBtn{
+background:#d63031;
+color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<a href="savollar-paneli.html" class="back">Bosh sahifa</a>
+
+<div class="admin-card">
+
+<h2>WRITING ADMIN</h2>
+
+<select id="level">
+  <option value="easy">Easy</option>
+  <option value="medium">Medium</option>
+  <option value="hard">Hard</option>
+</select>
+
+<input type="text" id="topic" placeholder="Writing mavzusi">
+
+<textarea id="task" placeholder="Writing topshirig'i (prompt)"></textarea>
+
+<button class="addBtn" onclick="addTask()">Qo'shish</button>
+
+<br><br>
+
+<div id="list"></div>
+
+</div>
+
+<!-- 🔥 MUHIM: script eng pastda -->
+<script src="writing-admin.js"></script>
+
+</body>
+</html>

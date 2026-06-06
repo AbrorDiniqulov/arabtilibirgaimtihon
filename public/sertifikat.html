@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATB Arabic Proficiency Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1E4FAF; --dark-blue: #163B85;
+    --text: #1A1A1A; --text2: #666666; --border: #D8E2F0;
+    --card-bg: #FAFBFD; --warning: #F59E0B;
+  }
+  body { font-family: 'Montserrat', sans-serif; background: #e8edf5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+
+  /* BOSHQRUV PANELI */
+  .panel { width: 100%; max-width: 794px; background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 24px rgba(30,79,175,0.10); }
+  .panel h2 { font-family: 'Playfair Display', serif; color: var(--dark-blue); font-size: 22px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .field input, .field select, .field textarea { border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-family: 'Montserrat', sans-serif; font-size: 13px; color: var(--text); outline: none; transition: border-color 0.2s; background: white; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); }
+  .field textarea { resize: vertical; min-height: 64px; }
+
+  /* Imzo chizish maydoni */
+  .sig-canvas-wrap { border: 1.5px solid var(--border); border-radius: 8px; background: #FCFDFE; position: relative; overflow: hidden; margin-top: 5px; }
+  #sigCanvas { display: block; background: transparent; cursor: crosshair; width: 100%; height: 120px; }
+  .sig-clear-btn { position: absolute; right: 10px; bottom: 10px; background: #EF4444; color: white; border: none; padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 4px; cursor: pointer; font-family: 'Montserrat', sans-serif; }
+  .sig-clear-btn:hover { background: #DC2626; }
+
+  .score-row { display: flex; align-items: center; gap: 10px; }
+  .score-row input[type=range] { flex: 1; accent-color: var(--blue); }
+  .score-val { min-width: 38px; text-align: right; font-weight: 700; color: var(--blue); font-size: 14px; }
+
+  /* Rasm yuklash */
+  .photo-upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s; background: var(--card-bg); }
+  .photo-upload-area:hover { border-color: var(--blue); }
+  .photo-upload-area input { display: none; }
+  .photo-upload-area p { font-size: 12px; color: var(--text2); margin-top: 8px; }
+  #photoPreview { width: 80px; height: 100px; border-radius: 8px; object-fit: cover; display: none; margin: 0 auto 8px; }
+
+  .btn-generate { margin-top: 20px; width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+  .btn-generate:hover { background: var(--dark-blue); }
+
+  .download-btns { display: none; margin-top: 12px; width: 100%; max-width: 794px; gap: 10px; }
+  .download-btns.active { display: flex; }
+  .btn-download { flex: 1; padding: 14px; color: white; border: none; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; transition: background 0.2s; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .btn-download:hover { transform: translateY(-1px); }
+  .btn-jpg { background: #F59E0B; }
+  .btn-jpg:hover { background: #D97706; }
+  .btn-png { background: #10B981; }
+  .btn-png:hover { background: #059669; }
+
+  /* REPORT O'LCHAMLARI - A4 SIFATIDA TO'LIQ MOSLASHISHI */
+  #report-wrap { display: none; margin-top: 10px; page-break-inside: avoid; page-break-after: avoid; break-inside: avoid; }
+  .report { 
+    width: 794px; 
+    height: 1122px; 
+    min-height: 1122px;
+    max-height: 1122px;
+    background: white; 
+    position: relative; 
+    overflow: hidden; 
+    box-shadow: 0 8px 48px rgba(30,79,175,0.15); 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+    break-inside: avoid;
+  }
+
+  /* Burchak bezaklari */
+  .corner { position: absolute; width: 60px; height: 60px; pointer-events: none; }
+  .corner.tl { top: 15px; left: 15px; }
+  .corner.tr { top: 15px; right: 15px; }
+  .corner.bl { bottom: 35px; left: 15px; }
+  .corner.br { bottom: 35px; right: 15px; }
+
+  /* HEADER */
+  .r-header { text-align: center; padding: 45px 40px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .r-logo { width: auto; height: 125px; max-height: 125px; object-fit: contain; display: block; margin: 0 auto 5px; }
+  .report-title { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 700; color: var(--dark-blue); margin-top: 2px; }
+  .title-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); margin: 6px auto 0; }
+
+  /* PROFILE SECTION */
+  .r-profile { display: grid; grid-template-columns: 120px 1fr 180px; gap: 25px; padding: 12px 50px; align-items: center; }
+  .photo-card { border: 2.5px solid #BDCADA; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; align-items: center; background: var(--card-bg); width: 120px; height: 150px; }
+  .photo-card img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+  .photo-placeholder-box { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f0f3f8; color: #bbb; }
+
+  .info-card { padding: 0 5px; display: flex; flex-direction: column; justify-content: center; }
+  .candidate-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--dark-blue); margin-bottom: 12px; text-transform: uppercase; }
+  .info-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12.5px; }
+  .info-icon { color: var(--blue); width: 14px; flex-shrink: 0; }
+  .info-label { color: var(--text2); min-width: 130px; }
+  .info-value { color: var(--text); font-weight: 600; }
+
+  .cefr-card { border: 2px solid var(--border); border-radius: 12px; background: var(--card-bg); padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; }
+  .cefr-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: var(--text2); text-transform: uppercase; margin-bottom: 2px; }
+  .cefr-level { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: var(--blue); line-height: 1; margin: 2px 0; }
+  .cefr-divider { width: 35px; height: 2px; background: var(--blue); margin: 4px auto; }
+  .cefr-desc { font-size: 10px; color: var(--text); line-height: 1.4; }
+
+  /* SKILLS SECTION */
+  .r-skills { padding: 12px 50px; }
+  .section-title { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--dark-blue); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+  .section-title::before, .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .skills-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .skill-col { border: 1px solid var(--border); border-radius: 12px; background: white; padding: 12px 4px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .skill-icon { color: var(--blue); }
+  .skill-name { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--dark-blue); text-transform: uppercase; }
+  .skill-grade { font-size: 10.5px; color: var(--text2); font-weight: 500; margin-top: 1px; }
+
+  .circle-wrap { position: relative; width: 68px; height: 68px; }
+  .circle-wrap svg { transform: rotate(-90deg); }
+  .circle-bg { fill: none; stroke: #E8EDF5; stroke-width: 6; }
+  .circle-prog { fill: none; stroke-width: 6; stroke-linecap: round; }
+  .circle-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--dark-blue); }
+
+  /* BOTTOM SECTION & YANGI ULKAN OVERALL SCORE DIZAYNI */
+  .r-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; padding: 12px 50px; }
+
+  .overall-card { 
+    border: 2.5px solid var(--blue); 
+    border-radius: 16px; 
+    background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%); 
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    text-align: center;
+    position: relative;
+    box-shadow: 0 6px 18px rgba(30,79,175,0.06);
+  }
+  .overall-label { font-size: 11px; font-weight: 800; letter-spacing: 3px; color: var(--blue); text-transform: uppercase; margin-bottom: 5px; }
+  .overall-score-display { display: flex; align-items: baseline; gap: 2px; margin: 4px 0; }
+  .overall-score-val { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 900; color: var(--dark-blue); line-height: 1; }
+  .overall-score-max { font-size: 24px; color: var(--text2); font-weight: 500; margin-left: 2px; }
+  .progress-container { width: 100%; margin-top: 12px; }
+  .progress-bar-wrap { background: #E8EDF5; border-radius: 999px; height: 10px; overflow: hidden; width: 100%; }
+  .progress-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue), var(--dark-blue)); }
+  .overall-grade { margin-top: 10px; font-size: 15px; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 1px; }
+
+  .strengths-col { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+  .strength-item { display: flex; gap: 12px; align-items: flex-start; }
+  .s-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .s-icon.blue-bg { background: var(--blue); color: white; }
+  .s-icon.orange { background: var(--warning); color: white; }
+  .s-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+  .s-title.blue-txt { color: var(--blue); }
+  .s-title.orange { color: var(--warning); }
+  .s-text { font-size: 11px; color: var(--text); line-height: 1.4; }
+
+  /* FOOTER SECTION */
+  .r-footer { display: grid; grid-template-columns: 180px 1fr 120px; gap: 15px; align-items: center; padding: 12px 50px 25px; background: white; }
+  .sig-area { display: flex; flex-direction: column; gap: 2px; min-height: 70px; justify-content: flex-end;}
+  #rSigImg { max-height: 48px; max-width: 150px; object-fit: contain; margin-bottom: 2px; display: block; }
+  .sig-name { font-size: 12.5px; font-weight: 700; color: var(--dark-blue); letter-spacing: 0.5px; }
+  .sig-title { font-size: 11px; color: var(--text2); }
+
+  .report-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); padding: 0 20px; }
+  .ri-row { display: flex; flex-direction: column; gap: 2px; }
+  .ri-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--blue); text-transform: uppercase; }
+  .ri-val { font-size: 11.5px; font-weight: 600; color: var(--text); }
+  .seal-wrap { display: flex; justify-content: flex-end; align-items: center; }
+  .r-seal-img { width: 110px; height: 110px; object-fit: contain; }
+  .footer-bar { background: var(--dark-blue); padding: 10px 40px; text-align: center; font-size: 11px; color: rgba(255,255,255,0.75); letter-spacing: 0.5px; width: 100%; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .panel, .download-btns { display: none !important; }
+    #report-wrap { display: block !important; }
+    .report { box-shadow: none; width: 794px; height: 1122px; }
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="panel">
+  <h2>📋 Report Ma'lumotlarini Kiriting</h2>
+
+  <div style="margin-bottom:18px;">
+    <div class="field"><label>Talaba Rasmi</label></div>
+    <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()" style="margin-top:6px;">
+      <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(this)">
+      <img id="photoPreview" src="" alt="Preview">
+      <svg id="uploadIcon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12l4-4 4 4"/></svg>
+      <p id="uploadText">Rasm tanlash uchun bosing (JPG, PNG)</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="field"><label>To'liq Ism</label><input type="text" id="fullName" value="MIRSALOMOV HUSAN"></div>
+    <div class="field"><label>Candidate ID</label><input type="text" id="candidateId" value="ATB-26-03-649754"></div>
+    <div class="field"><label>Baholash Sanasi</label><input type="text" id="assessDate" value="10.03.2026"></div>
+    <div class="field"><label>Ona Tili</label><input type="text" id="nativeLang" value="Uzbek"></div>
+    <div class="field"><label>Test Turi</label><input type="text" id="testType" value="Mock Assessment"></div>
+    <div class="field"><label>CEFR Darajasi</label>
+      <select id="cefrLevel">
+        <option>A1</option><option>A2</option>
+        <option value="B1" selected>B1</option>
+        <option>B2</option><option>C1</option><option>C2</option>
+      </select>
+    </div>
+    <div class="field"><label>Direktor Ismi</label><input type="text" id="directorName" value="A. DINIQULOV"></div>
+    <div class="field"><label>Report ID</label><input type="text" id="reportId" value="ATB-RPT-26-03-649754"></div>
+    <div class="field"><label>Berilgan Sana</label><input type="text" id="issueDate" value="10.03.2026"></div>
+    <div class="field"><label>Amal Qilish Muddati</label><input type="text" id="validUntil" value="10.03.2027"></div>
+  </div>
+
+  <div style="margin-top:14px;">
+    <div class="field">
+      <label>Direktor Imzosi (Sichqoncha yoki Sensor orqali chizing)</label>
+      <div class="sig-canvas-wrap">
+        <canvas id="sigCanvas"></canvas>
+        <button class="sig-clear-btn" type="button" onclick="clearSignature()">Tozalash</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;">
+    <div class="field"><label>Kuchli Tomonlar (Strengths)</label>
+      <textarea id="strengths">You demonstrate strong reading comprehension and a solid understanding of grammar.</textarea>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Takomillashtirish (Areas to Improve)</label>
+      <textarea id="improvements">Focus on speaking fluency and confidence to express your ideas more naturally.</textarea>
+    </div>
+  </div>
+
+  <div style="margin-top:18px; font-size:12px; font-weight:600; color:var(--dark-blue); margin-bottom:10px;">Ko'nikmalar Baholari (%)</div>
+  <div class="grid3">
+    <div class="field"><label>Reading</label><div class="score-row"><input type="range" id="sReading" min="0" max="100" value="90" oninput="document.getElementById('vReading').textContent=this.value+'%'"><span class="score-val" id="vReading">90%</span></div></div>
+    <div class="field"><label>Listening</label><div class="score-row"><input type="range" id="sListening" min="0" max="100" value="86" oninput="document.getElementById('vListening').textContent=this.value+'%'"><span class="score-val" id="vListening">86%</span></div></div>
+    <div class="field"><label>Writing</label><div class="score-row"><input type="range" id="sWriting" min="0" max="100" value="80" oninput="document.getElementById('vWriting').textContent=this.value+'%'"><span class="score-val" id="vWriting">80%</span></div></div>
+    <div class="field"><label>Speaking</label><div class="score-row"><input type="range" id="sSpeaking" min="0" max="100" value="100" oninput="document.getElementById('vSpeaking').textContent=this.value+'%'"><span class="score-val" id="vSpeaking">100%</span></div></div>
+    <div class="field"><label>Grammar</label><div class="score-row"><input type="range" id="sGrammar" min="0" max="100" value="100" oninput="document.getElementById('vGrammar').textContent=this.value+'%'"><span class="score-val" id="vGrammar">100%</span></div></div>
+    <div class="field"><label>Overall Score</label><div class="score-row"><input type="range" id="sOverall" min="0" max="100" value="91" oninput="document.getElementById('vOverall').textContent=this.value"><span class="score-val" id="vOverall">91</span></div></div>
+  </div>
+
+  <button class="btn-generate" onclick="generateReport()">🎓 Report Yaratish</button>
+</div>
+
+<div class="download-btns" id="downloadBtns">
+  <button class="btn-download btn-jpg" onclick="downloadImage('jpeg')">📷 JPG yuklash</button>
+  <button class="btn-download btn-png" onclick="downloadImage('png')">🖼️ PNG yuklash</button>
+</div>
+
+<div id="report-wrap">
+<div class="report" id="report">
+
+  <div class="corner tl"><svg viewBox="0 0 70 70" fill="none"><path d="M2 2 L68 2" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M2 2 L2 68" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M14 2 L14 14 L2 14" stroke="#1E4FAF" stroke-width="2" opacity="0.5" fill="none"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 70 70" fill="none"><path d="M68 2 L2 2" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M68 2 L68 68" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M56 2 L56 14 L68 14" stroke="#1E4FAF" stroke-width="2" opacity="0.5" fill="none"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 70 70" fill="none"><path d="M2 68 L68 68" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M2 68 L2 2" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M14 68 L14 56 L2 56" stroke="#1E4FAF" stroke-width="2" opacity="0.5" fill="none"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 70 70" fill="none"><path d="M68 68 L2 68" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M68 68 L68 2" stroke="#1E4FAF" stroke-width="2.5" opacity="0.35"/><path d="M56 68 L56 56 L68 56" stroke="#1E4FAF" stroke-width="2" opacity="0.5" fill="none"/></svg></div>
+
+  <div class="r-header">
+    <img src="https://ia600604.us.archive.org/18/items/img-20260603-221321-263_202606/IMG_20260603_221321_263.png" alt="ATB Logo" class="r-logo" crossorigin="anonymous">
+    <div class="report-title">Arabic Proficiency Report</div>
+    <div class="title-dot"></div>
+  </div>
+
+  <div class="r-profile">
+    <div class="photo-card">
+      <div class="photo-placeholder-box" id="rPhotoPlaceholder">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <img id="rPhotoImg" src="" alt="Photo" style="display:none;">
+    </div>
+
+    <div class="info-card">
+      <div class="candidate-name" id="rName">MIRSALOMOV HUSAN</div>
+      <div class="info-row">
+        <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+        <span class="info-label">Date of Assessment</span><span class="info-value" id="rAssessDate">10.03.2026</span>
+      </div>
+      <div class="info-row">
+        <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+        <span class="info-label">Candidate ID</span><span class="info-value" id="rCandidateId">ATB-26-03-649754</span>
+      </div>
+      <div class="info-row">
+        <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 01-1.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/></svg>
+        <span class="info-label">Native Language</span><span class="info-value" id="rNativeLang">Uzbek</span>
+      </div>
+      <div class="info-row">
+        <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+        <span class="info-label">Test Type</span><span class="info-value" id="rTestType">Mock Assessment</span>
+      </div>
+    </div>
+
+    <div class="cefr-card">
+      <div class="cefr-label">Estimated CEFR Level</div>
+      <div class="cefr-level" id="rCefr">B1</div>
+      <div class="cefr-divider"></div>
+      <div class="cefr-desc" id="rCefrDesc">You can understand the main points of clear standard input on familiar matters regularly encountered in work, school, leisure, etc.</div>
+    </div>
+  </div>
+
+  <div class="r-skills">
+    <div class="section-title">Language Skills</div>
+    <div class="skills-grid">
+      <div class="skill-col">
+        <svg class="skill-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <div class="skill-name">Reading</div>
+        <div class="circle-wrap"><svg width="68" height="68" viewBox="0 0 72 72"><circle class="circle-bg" cx="36" cy="36" r="32"/><circle class="circle-prog" id="circReading" cx="36" cy="36" r="32" stroke="#1E4FAF" stroke-dasharray="201.1" stroke-dashoffset="20.1"/></svg><div class="circle-text" id="txtReading">90%</div></div>
+        <div class="skill-grade" id="gReading">Excellent</div>
+      </div>
+      <div class="skill-col">
+        <svg class="skill-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
+        <div class="skill-name">Listening</div>
+        <div class="circle-wrap"><svg width="68" height="68" viewBox="0 0 72 72"><circle class="circle-bg" cx="36" cy="36" r="32"/><circle class="circle-prog" id="circListening" cx="36" cy="36" r="32" stroke="#1E4FAF" stroke-dasharray="201.1" stroke-dashoffset="28.2"/></svg><div class="circle-text" id="txtListening">86%</div></div>
+        <div class="skill-grade" id="gListening">Very Good</div>
+      </div>
+      <div class="skill-col">
+        <svg class="skill-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <div class="skill-name">Writing</div>
+        <div class="circle-wrap"><svg width="68" height="68" viewBox="0 0 72 72"><circle class="circle-bg" cx="36" cy="36" r="32"/><circle class="circle-prog" id="circWriting" cx="36" cy="36" r="32" stroke="#1E4FAF" stroke-dasharray="201.1" stroke-dashoffset="40.2"/></svg><div class="circle-text" id="txtWriting">80%</div></div>
+        <div class="skill-grade" id="gWriting">Good</div>
+      </div>
+      <div class="skill-col">
+        <svg class="skill-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <div class="skill-name">Speaking</div>
+        <div class="circle-wrap"><svg width="68" height="68" viewBox="0 0 72 72"><circle class="circle-bg" cx="36" cy="36" r="32"/><circle class="circle-prog" id="circSpeaking" cx="36" cy="36" r="32" stroke="#1E4FAF" stroke-dasharray="201.1" stroke-dashoffset="0"/></svg><div class="circle-text" id="txtSpeaking">100%</div></div>
+        <div class="skill-grade" id="gSpeaking">Excellent</div>
+      </div>
+      <div class="skill-col">
+        <svg class="skill-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/><path d="M15 15l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="skill-name">Grammar</div>
+        <div class="circle-wrap"><svg width="68" height="68" viewBox="0 0 72 72"><circle class="circle-bg" cx="36" cy="36" r="32"/><circle class="circle-prog" id="circGrammar" cx="36" cy="36" r="32" stroke="#1E4FAF" stroke-dasharray="201.1" stroke-dashoffset="0"/></svg><div class="circle-text" id="txtGrammar">100%</div></div>
+        <div class="skill-grade" id="gGrammar">Excellent</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="r-bottom">
+    <div class="overall-card">
+      <div class="overall-label">Overall Score</div>
+      <div class="overall-score-display">
+        <span class="overall-score-val" id="rOverall">91</span>
+        <span class="overall-score-max">/100</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="overallBar" style="width:91%"></div></div>
+      </div>
+      <div class="overall-grade" id="rOverallGrade">Excellent</div>
+    </div>
+
+    <div class="strengths-col">
+      <div class="strength-item">
+        <div class="s-icon blue-bg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div><div class="s-title blue-txt">Strengths</div><div class="s-text" id="rStrengths">You demonstrate strong reading comprehension and a solid understanding of grammar.</div></div>
+      </div>
+      <div class="strength-item">
+        <div class="s-icon orange">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M13 7h-2v6h2V7zm0 8h-2v2h2v-2zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+        </div>
+        <div><div class="s-title orange">Areas to Improve</div><div class="s-text" id="rImprovements">Focus on speaking fluency and confidence to express your ideas more naturally.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="r-footer">
+    <div class="sig-area">
+      <img id="rSigImg" src="" alt="Director Signature" style="display:none;">
+      <div class="sig-name" id="rDirector">A. DINIQULOV</div>
+      <div class="sig-title">Director</div>
+    </div>
+
+    <div class="report-info">
+      <div class="ri-row"><span class="ri-label">Report ID</span><span class="ri-val" id="rReportId">ATB-RPT-26-03-649754</span></div>
+      <div class="ri-row"><span class="ri-label">Issue Date</span><span class="ri-val" id="rIssueDate">10.03.2026</span></div>
+      <div class="ri-row"><span class="ri-label">Valid Until</span><span class="ri-val" id="rValidUntil">10.03.2027</span></div>
+      <div class="ri-row"><span class="ri-label">Status</span><span class="ri-val" style="color:#10B981;">✓ Verified</span></div>
+    </div>
+
+    <div class="seal-wrap">
+      <img src="https://i.ibb.co/Mk5wYY7r/IMG-20260603-221316-995.png" alt="Official Seal" class="r-seal-img" crossorigin="anonymous">
+    </div>
+  </div>
+
+  <div class="footer-bar">www.arabtilibirga.uz</div>
+</div>
+</div>
+
+<script>
+const cefrDescs = {
+  A1:"You can understand and use familiar everyday expressions and very basic phrases aimed at satisfying concrete needs.",
+  A2:"You can understand sentences and frequently used expressions related to areas of most immediate relevance.",
+  B1:"You can understand the main points of clear standard input on familiar matters regularly encountered in work, school, leisure, etc.",
+  B2:"You can understand the main ideas of complex text on both concrete and abstract topics, including technical discussions in your field.",
+  C1:"You can understand a wide range of demanding, longer texts, and recognise implicit meaning.",
+  C2:"You can understand with ease virtually everything heard or read. You can summarise information from different spoken and written sources."
+};
+
+let photoDataURL = null;
+const canvas = document.getElementById('sigCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+
+function resizeCanvas() {
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = 120;
+  ctx.strokeStyle = "#1A1A1A";
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+}
+
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); });
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
+canvas.addEventListener('touchend', stopDrawing);
+
+function startDrawing(e) {
+  drawing = true;
+  ctx.beginPath();
+  const rect = canvas.getBoundingClientRect();
+  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+function draw(e) {
+  if (!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.stroke();
+}
+function stopDrawing() { drawing = false; }
+function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    photoDataURL = e.target.result;
+    const prev = document.getElementById('photoPreview');
+    prev.src = photoDataURL;
+    prev.style.display = 'block';
+    document.getElementById('uploadIcon').style.display = 'none';
+    document.getElementById('uploadText').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function getGrade(v) {
+  if (v >= 90) return 'Excellent';
+  if (v >= 80) return 'Very Good';
+  if (v >= 70) return 'Good';
+  if (v >= 60) return 'Satisfactory';
+  if (v >= 50) return 'Needs Work';
+  return 'Beginner';
+}
+
+function setCircle(id, pct, color) {
+  const r = 32, total = 2 * Math.PI * r;
+  document.getElementById('circ'+id).style.strokeDashoffset = total - (pct/100)*total;
+  document.getElementById('circ'+id).style.stroke = color;
+  document.getElementById('txt'+id).textContent = pct+'%';
+  document.getElementById('g'+id).textContent = getGrade(pct);
+}
+
+function generateReport() {
+  const v = id => document.getElementById(id).value;
+
+  document.getElementById('rName').textContent = v('fullName') || '[FULL NAME]';
+  document.getElementById('rAssessDate').textContent = v('assessDate');
+  document.getElementById('rCandidateId').textContent = v('candidateId');
+  document.getElementById('rNativeLang').textContent = v('nativeLang');
+  document.getElementById('rTestType').textContent = v('testType');
+  document.getElementById('rDirector').textContent = v('directorName');
+  document.getElementById('rReportId').textContent = v('reportId');
+  document.getElementById('rIssueDate').textContent = v('issueDate');
+  document.getElementById('rValidUntil').textContent = v('validUntil');
+  document.getElementById('rStrengths').textContent = v('strengths');
+  document.getElementById('rImprovements').textContent = v('improvements');
+
+  const cefr = v('cefrLevel');
+  document.getElementById('rCefr').textContent = cefr;
+  document.getElementById('rCefrDesc').textContent = cefrDescs[cefr] || '';
+
+  const ph = document.getElementById('rPhotoPlaceholder');
+  const pi = document.getElementById('rPhotoImg');
+  if (photoDataURL) {
+    pi.src = photoDataURL; pi.style.display = 'block'; ph.style.display = 'none';
+  } else {
+    pi.style.display = 'none'; ph.style.display = 'flex';
+  }
+
+  const sigImg = document.getElementById('rSigImg');
+  const blank = document.createElement('canvas');
+  blank.width = canvas.width;
+  blank.height = canvas.height;
+  if (canvas.toDataURL() !== blank.toDataURL()) {
+    sigImg.src = canvas.toDataURL();
+    sigImg.style.display = 'block';
+  } else {
+    sigImg.style.display = 'none';
+  }
+
+  const blue = '#1E4FAF';
+  setCircle('Reading',  +document.getElementById('sReading').value,  blue);
+  setCircle('Listening',+document.getElementById('sListening').value, blue);
+  setCircle('Writing',  +document.getElementById('sWriting').value,  blue);
+  setCircle('Speaking', +document.getElementById('sSpeaking').value,  blue);
+  setCircle('Grammar',  +document.getElementById('sGrammar').value,  blue);
+
+  const ov = +document.getElementById('sOverall').value;
+  document.getElementById('rOverall').textContent = ov;
+  document.getElementById('overallBar').style.width = ov + '%';
+  document.getElementById('rOverallGrade').textContent = getGrade(ov);
+
+  document.getElementById('report-wrap').style.display = 'block';
+  document.getElementById('downloadBtns').classList.add('active');
+  setTimeout(() => document.getElementById('report').scrollIntoView({ behavior:'smooth' }), 100);
+}
+
+async function downloadImage(format) {
+  const element = document.getElementById('report');
+  const candidateName = document.getElementById('rName').textContent.trim();
+  const safeName = candidateName.replace(/\s+/g, '_');
+  const ext = format === 'jpeg' ? 'jpg' : 'png';
+  const filename = 'ATB_Report_' + safeName + '.' + ext;
+
+  // Show loading state
+  const btn = format === 'jpeg' ? document.querySelector('.btn-jpg') : document.querySelector('.btn-png');
+  const originalText = btn.textContent;
+  btn.textContent = 'Yuklanmoqda...';
+  btn.disabled = true;
+
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: 794,
+      height: 1122,
+      windowWidth: 794,
+      windowHeight: 1122,
+      logging: false
+    });
+
+    const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const quality = format === 'jpeg' ? 0.95 : undefined;
+    const dataUrl = canvas.toDataURL(mimeType, quality);
+
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = dataUrl;
+    link.click();
+  } catch (err) {
+    alert('Yuklashda xatolik: ' + err.message);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+window.onload = () => {
+  resizeCanvas();
+  generateReport();
+};
+window.onresize = resizeCanvas;
+</script>
+</body>
+</html>

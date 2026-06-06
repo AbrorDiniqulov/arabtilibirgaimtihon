@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel - Imtihon Platforma</title>
+
+<style>
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+}
+
+/* ================= TIMER ================= */
+#globalTimer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.45);
+  color: #00ffcc;
+  font-weight: bold;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+/* ================= EXIT ================= */
+#exitBtn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 12px 18px;
+  background: #ff7675;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* ================= CENTER ================= */
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+/* ================= CARD (KATTA) ================= */
+.card {
+  width: 100%;
+  max-width: 650px;
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(14px);
+  padding: 45px;
+  border-radius: 25px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.card h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 18px;
+  opacity: 0.85;
+}
+
+/* ================= MENU ================= */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.menu a {
+  display: block;
+  padding: 16px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  text-decoration: none;
+  border-radius: 14px;
+  font-size: 18px;
+  transition: 0.3s;
+}
+
+.menu a:hover {
+  background: rgba(255,255,255,0.28);
+  transform: scale(1.04);
+}
+
+/* ================= ADMIN LINKS ================= */
+#adminLinks {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+}
+
+#adminLinks a {
+  display: inline-block;
+  color: #00ffcc;
+  font-size: 18px;
+  text-decoration: none;
+  margin: 8px 12px;
+  padding: 10px 20px;
+  background: rgba(0,255,204,0.1);
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+#adminLinks a:hover {
+  background: rgba(0,255,204,0.2);
+  transform: scale(1.05);
+}
+
+/* ================= EXEMPT MANAGEMENT ================= */
+#exemptPanel {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+  text-align: left;
+}
+
+#exemptPanel h3 {
+  color: #00ffcc;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.exempt-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.exempt-input-group input {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+}
+
+.exempt-input-group button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #00b894;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.exempt-input-group button:hover {
+  background: #00a383;
+}
+
+#exemptList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#exemptList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+#exemptList li button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #e74c3c;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#exemptList li button:hover {
+  background: #c0392b;
+}
+
+.exempt-empty {
+  text-align: center;
+  opacity: 0.6;
+  font-size: 14px;
+  padding: 10px;
+}
+
+/* ================= TIME CONTROL ================= */
+#timeControlPanel {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+  text-align: left;
+}
+
+#timeControlPanel h3 {
+  color: #00ffcc;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+#timeControlDisplay {
+  font-size: 18px;
+  font-weight: bold;
+  color: #00ffcc;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.time-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: center;
+}
+
+.time-input-group input {
+  width: 100px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  text-align: center;
+  outline: none;
+}
+
+.time-input-group span {
+  color: white;
+  font-size: 16px;
+  align-self: center;
+}
+
+.time-btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.time-btn-group button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.time-btn-group button:first-child {
+  background: #00b894;
+}
+
+.time-btn-group button:first-child:hover {
+  background: #00a383;
+}
+
+.time-btn-group button:last-child {
+  background: #e74c3c;
+}
+
+.time-btn-group button:last-child:hover {
+  background: #c0392b;
+}
+
+.payment-status {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  display: none;
+}
+
+.payment-status.success {
+  background: rgba(0,184,148,0.3);
+  color: #00ffcc;
+  display: block;
+}
+
+.payment-status.error {
+  background: rgba(255,118,117,0.3);
+  color: #ff7675;
+  display: block;
+}
+
+.payment-status.info {
+  background: rgba(0,188,212,0.3);
+  color: #00e5ff;
+  display: block;
+}
+
+/* USER INFO */
+#userInfo {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 12px;
+  color: #00ffcc;
+  font-size: 14px;
+}
+
+</style>
+<base target="_blank">
+</head>
+
+<body>
+
+<!-- LOGIN VA ADMIN TEKSHIRUVI -->
+<script>
+(function(){
+  const currentUser = localStorage.getItem("currentUser");
+  if(!currentUser){
+    window.location.href = "login.html";
+    return;
+  }
+  const user = JSON.parse(currentUser);
+  if(user.role !== "admin"){
+    window.location.href = "index.html";
+    return;
+  }
+})();
+</script>
+
+<button id="exitBtn" onclick="logout()">⬅ Chiqish</button>
+<div id="userInfo"></div>
+
+<div class="wrapper">
+
+  <div class="card" id="mainScreen">
+
+    <h2>👑 ADMIN PANEL</h2>
+    <p>Imtihon platformasini boshqarish</p>
+
+    <div class="menu">
+      <a href="grammar.html" target="_self">📘 Grammatika</a>
+      <a href="eshitish.html" target="_self">🎧 Eshitish</a>
+      <a href="oqish.html" target="_self">📖 O'qish</a>
+      <a href="gapirish.html" target="_self">🗣 Gapirish</a>
+      <a href="yozish.html" target="_self">✍ Yozish</a>
+    </div>
+
+    <!-- ADMIN LINKS -->
+    <div id="adminLinks">
+      <a href="savollar-paneli.html" target="_self">📝 Savollar paneli</a>
+      <a href="natijalar.html" target="_self">📊 Imtihon natijalari</a>
+    </div>
+
+    <!-- ISTISNO LOGINLAR BOSHQARUVI -->
+    <div id="exemptPanel">
+      <h3>🛡 Istisno loginlar</h3>
+      <p style="text-align:center;font-size:14px;opacity:0.8;margin-bottom:15px;">
+        Bu yerda qo'shilgan loginlar to'lov chekini yuklamasdan imtihon topshirishlari mumkin.
+      </p>
+      <div class="exempt-input-group">
+        <input type="email" id="exemptEmail" placeholder="Email kiriting (masalan: user@test.com)">
+        <button id="btnAddExempt" onclick="addExemptLogin()">Qo'shish</button>
+      </div>
+      <ul id="exemptList">
+        <li class="exempt-empty">Hozircha istisno loginlar yo'q</li>
+      </ul>
+      <div style="text-align:center; margin-top:15px;">
+        <button onclick="clearAllExemptLogins()" style="background:#e74c3c; padding:8px 16px; border:none; border-radius:8px; color:white; cursor:pointer; font-size:13px;">🗑️ Hammasini tozalash</button>
+      </div>
+    </div>
+
+    <!-- VAQT BOSHQARUVI -->
+    <div id="timeControlPanel">
+      <h3>🕐 Imtihon vaqtini boshqarish</h3>
+
+      <div id="timeControlDisplay">
+        Vaqtni belgilash kerak
+      </div>
+
+      <div class="time-input-group">
+        <input type="number" id="examHours" placeholder="Soat" min="0" max="24" value="3">
+        <span>soat</span>
+        <input type="number" id="examMinutes" placeholder="Daqiqa" min="0" max="59" value="0">
+        <span>daqiqa</span>
+      </div>
+
+      <div class="time-btn-group">
+        <button id="btnSetTime" onclick="setExamTime()">✅ Vaqt o'rnatish</button>
+        <button id="btnResetTime" onclick="resetExamTime()">🗑️ Vaqt tozalash</button>
+      </div>
+
+      <div id="timeControlStatus" class="payment-status" style="display:none;"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBhYCOhm9Sl_9wTR19ASMNFOQ1Gs6zSEp4",
+    authDomain: "imtihon-ed6e6.firebaseapp.com",
+    projectId: "imtihon-ed6e6",
+    storageBucket: "imtihon-ed6e6.firebasestorage.app",
+    messagingSenderId: "400151105531",
+    appId: "1:400151105531:web:010d047756a07a48db855e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<script src="script.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Gapirish Test</title>
+
+<link rel="stylesheet" href="style.css">
+<base target="_self">
+</head>
+
+<body>
+
+<a class="back" href="index.html">⬅ Bosh sahifa</a>
+<div id="globalTimer"></div>
+
+<div class="box speaking-screen">
+
+  <h2>GAPIRISH TEST</h2>
+
+  <div class="question" id="question" style="display:none;"></div>
+
+  <div id="status"></div>
+
+  <button class="btn" id="startBtn" onclick="start()">Boshlash</button>
+
+  <div id="recording" style="display:none;">🔴 Recording...</div>
+
+  <audio id="audio" controls style="display:none;"></audio>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="script.js"></script>
+<script src="finish.js"></script>
+<script src="gapirish.js"></script>
+
+<script>
+window.addEventListener("load", function() {
+  if (typeof startExamTimer === "function") { startExamTimer(); }
+});
+</script>
+</body>
+</html>

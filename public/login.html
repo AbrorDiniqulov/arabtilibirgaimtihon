@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+}
+
+.container{
+width:100%;
+max-width:400px;
+background:#ffffff12;
+backdrop-filter:blur(10px);
+padding:35px;
+border-radius:20px;
+box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+
+h1{
+text-align:center;
+margin-bottom:25px;
+font-size:32px;
+}
+
+input{
+width:100%;
+padding:14px;
+margin-bottom:15px;
+border:none;
+border-radius:12px;
+font-size:16px;
+outline:none;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:#00bcd4;
+color:white;
+font-size:17px;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+background:#0097a7;
+}
+
+.link{
+text-align:center;
+margin-top:18px;
+font-size:15px;
+}
+
+.link a{
+color:#00e5ff;
+text-decoration:none;
+cursor:pointer;
+}
+
+.link a:hover{
+text-decoration:underline;
+}
+
+#registerBox{
+display:none;
+}
+
+/* PHOTO SECTION */
+.photo-section{
+margin-bottom:15px;
+text-align:center;
+}
+
+.photo-section label{
+display:block;
+margin-bottom:8px;
+font-size:14px;
+}
+
+.photo-preview{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #00bcd4;
+margin:0 auto 10px auto;
+display:none;
+background:#ffffff22;
+}
+
+.photo-preview.show{
+display:block;
+}
+
+.photo-buttons{
+display:flex;
+gap:10px;
+justify-content:center;
+}
+
+.photo-buttons button{
+width:auto;
+padding:8px 14px;
+font-size:13px;
+}
+
+#cameraVideo{
+width:100%;
+max-width:280px;
+border-radius:12px;
+display:none;
+margin:0 auto 10px auto;
+}
+
+#cameraCanvas{
+display:none;
+}
+
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="loginBox">
+
+    <h1>LOGIN</h1>
+
+    <!-- EMAIL bilan kirish -->
+    <input
+      type="email"
+      id="loginEmail"
+      placeholder="Email">
+
+    <input
+      type="password"
+      id="loginPassword"
+      placeholder="Parol">
+
+    <button onclick="doLogin()">
+      Kirish
+    </button>
+
+    <div class="link">
+      Akkount yo'qmi?
+      <a onclick="showRegister()">
+        Ro'yxatdan o'tish
+      </a>
+    </div>
+
+  </div>
+
+
+  <!-- REGISTER -->
+  <div id="registerBox">
+
+    <h1>REGISTER</h1>
+
+    <input
+      type="text"
+      id="regName"
+      placeholder="Ism">
+
+    <input
+      type="email"
+      id="regEmail"
+      placeholder="Email">
+
+    <input
+      type="tel"
+      id="regPhone"
+      placeholder="Telefon raqami">
+
+    <input
+      type="password"
+      id="regPassword"
+      placeholder="Parol">
+
+    <input
+      type="password"
+      id="regPassword2"
+      placeholder="Parolni tasdiqlang">
+
+    <!-- PHOTO -->
+    <div class="photo-section">
+      <label>Rasm (majburiy):</label>
+      <img id="photoPreview" class="photo-preview" src="" alt="">
+      <video id="cameraVideo" autoplay playsinline></video>
+      <canvas id="cameraCanvas"></canvas>
+      <div class="photo-buttons">
+        <button onclick="startCamera()">📷 Kamera</button>
+        <button onclick="document.getElementById('fileInput').click()">📁 Yuklash</button>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileUpload(event)">
+      <button id="snapBtn" onclick="capturePhoto()" style="display:none;margin-top:8px;width:auto;padding:8px 20px;">📸 Rasmga olish</button>
+      <button id="closeCamBtn" onclick="closeCamera()" style="display:none;margin-top:8px;width:auto;padding:8px 20px;background:#e74c3c;">❌ Yopish</button>
+    </div>
+
+    <button onclick="doRegister()">
+      Ro'yxatdan o'tish
+    </button>
+
+    <div class="link">
+      Akkount bormi?
+      <a onclick="showLogin()">
+        Kirish
+      </a>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="login.js"></script>
+
+</body>
+</html>

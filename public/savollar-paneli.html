@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Savollar Paneli — Admin</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  min-height: 100vh;
+  overflow-y: auto;
+  font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at 50% 0%, #1a2c3d, #15222f, #0e1720);
+  background-attachment: fixed;
+  color: white;
+  padding: 20px;
+}
+
+/* Timer hidden for admin */
+#globalTimer { display: none !important; }
+
+/* Back button */
+.back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: 0.25s;
+  z-index: 1000;
+  font-family: inherit;
+}
+
+.back-btn:hover {
+  background: white;
+  color: #0e1720;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 80px auto 40px;
+  padding: 0 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.header__icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.header__title {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.header__subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* 🔥 BUTTON instead of <a> to prevent new tab */
+.admin-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 36px 28px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  color: white;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.admin-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00ffd0, #00b8a9);
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.admin-card:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-6px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.admin-card:hover::before {
+  opacity: 1;
+}
+
+.admin-card__icon {
+  font-size: 52px;
+  margin-bottom: 16px;
+  transition: 0.3s;
+}
+
+.admin-card:hover .admin-card__icon {
+  transform: scale(1.15);
+}
+
+.admin-card__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.admin-card__desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+}
+
+.admin-card__count {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 6px 16px;
+  background: rgba(0, 255, 180, 0.1);
+  border: 1px solid rgba(0, 255, 180, 0.2);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #00ffd0;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .header__title { font-size: 28px; }
+  .admin-grid { grid-template-columns: 1fr; gap: 16px; }
+  .admin-card { padding: 28px 20px; }
+  .admin-card__icon { font-size: 40px; }
+  .back-btn { padding: 10px 16px; font-size: 14px; }
+}
+</style>
+<base target="_blank">
+</head>
+
+<body>
+
+<!-- 🔥 Back button as BUTTON not <a> -->
+<button class="back-btn" onclick="goToPage('index.html')">← Orqaga</button>
+
+<div class="container">
+  <div class="header">
+    <div class="header__icon">⚙️</div>
+    <h1 class="header__title">Savollar Paneli</h1>
+    <p class="header__subtitle">Barcha bo'limlar uchun savollarni boshqarish</p>
+  </div>
+
+  <div class="admin-grid">
+    <!-- 🔥 BUTTONS instead of <a> links -->
+    <button class="admin-card" onclick="goToPage('grammar-admin.html')">
+      <div class="admin-card__icon">📘</div>
+      <div class="admin-card__title">Grammatika</div>
+      <div class="admin-card__desc">Grammar savollarini qo'shish, tahrirlash va o'chirish</div>
+      <span class="admin-card__count" id="grammarCount">0 ta savol</span>
+    </button>
+
+    <button class="admin-card" onclick="goToPage('listening-admin.html')">
+      <div class="admin-card__icon">🎧</div>
+      <div class="admin-card__title">Eshitish</div>
+      <div class="admin-card__desc">Listening audio va savollarini boshqarish</div>
+      <span class="admin-card__count" id="listeningCount">0 ta savol</span>
+    </button>
+
+    <button class="admin-card" onclick="goToPage('reading-admin.html')">
+      <div class="admin-card__icon">📖</div>
+      <div class="admin-card__title">O'qish</div>
+      <div class="admin-card__desc">Reading matn va savollarini boshqarish</div>
+      <span class="admin-card__count" id="readingCount">0 ta matn</span>
+    </button>
+
+    <button class="admin-card" onclick="goToPage('speaking-admin.html')">
+      <div class="admin-card__icon">🗣</div>
+      <div class="admin-card__title">Gapirish</div>
+      <div class="admin-card__desc">Speaking mavzularini boshqarish</div>
+      <span class="admin-card__count" id="speakingCount">0 ta mavzu</span>
+    </button>
+
+    <button class="admin-card" onclick="goToPage('writing-admin.html')">
+      <div class="admin-card__icon">✍</div>
+      <div class="admin-card__title">Yozish</div>
+      <div class="admin-card__desc">Writing mavzularini boshqarish</div>
+      <span class="admin-card__count" id="writingCount">0 ta mavzu</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* 🔥 Navigate in same tab */
+function goToPage(url) {
+  window.location.href = url;
+}
+
+function safeJSON(data) {
+  try { return data ? JSON.parse(data) : null; }
+  catch { return null; }
+}
+
+function initAdmin() {
+  const user = safeJSON(localStorage.getItem("currentUser"));
+  if (!user || user.role !== "admin") {
+    window.location.href = "login.html";
+    return;
+  }
+  updateCounts();
+}
+
+function updateCounts() {
+  const grammar = JSON.parse(localStorage.getItem("grammarQuestions") || "[]");
+  const listening = JSON.parse(localStorage.getItem("listeningQuestions") || "[]");
+  const reading = JSON.parse(localStorage.getItem("readingPassages") || "[]");
+  const speaking = JSON.parse(localStorage.getItem("speakingTopics") || "[]");
+  const writing = JSON.parse(localStorage.getItem("writingTopics") || "[]");
+
+  const gEl = document.getElementById("grammarCount");
+  const lEl = document.getElementById("listeningCount");
+  const rEl = document.getElementById("readingCount");
+  const sEl = document.getElementById("speakingCount");
+  const wEl = document.getElementById("writingCount");
+
+  if (gEl) gEl.textContent = grammar.length + " ta savol";
+  if (lEl) lEl.textContent = listening.length + " ta savol";
+  if (rEl) rEl.textContent = reading.length + " ta matn";
+  if (sEl) sEl.textContent = speaking.length + " ta mavzu";
+  if (wEl) wEl.textContent = writing.length + " ta mavzu";
+}
+
+window.addEventListener("load", initAdmin);
+</script>
+
+</body>
+</html>

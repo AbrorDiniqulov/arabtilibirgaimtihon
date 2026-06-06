@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>O'qish</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- BACK -->
+<a class="back" href="index.html">⬅ Bosh sahifa</a>
+
+<!-- GLOBAL TIMER -->
+<div id="globalTimer"></div>
+
+<!-- MAIN CONTAINER -->
+<div class="box" id="screen">
+
+  <!-- START -->
+  <div id="startSection">
+    <h2>O‘QISH TEST</h2>
+    <button class="btn" onclick="startReading()">Boshlash</button>
+  </div>
+
+  <!-- FULL TEXT -->
+  <div id="fullText" style="display:none; flex-direction:column; gap:15px; width:100%;">
+
+    <div id="onlyText"></div>
+
+    <button class="btn" onclick="showSplit()">Keyingi</button>
+  </div>
+
+  <!-- SPLIT MODE -->
+  <div id="split" style="display:none; width:100%; height:100%;">
+
+    <div id="questionBox"></div>
+
+    <div id="sideText"></div>
+
+  </div>
+
+</div>
+
+<!-- JS -->
+<script src="finish.js"></script>
+<script src="oqish.js"></script>
+<script src="script.js"></script>
+
+<script>
+window.addEventListener("load", () => {
+  if (typeof startSharedTimer === "function") {
+    startSharedTimer();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Grammar Test</title>
+
+<link rel="stylesheet" href="style.css">
+<style>
+  #quiz textarea,
+  #quiz input[type="text"] {
+    font-size: 22px;
+  }
+  #analyticalSection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+</style>
+
+<script>
+// Auto-detect text direction and font size for grammar inputs and textareas
+(function() {
+  var arabicRegex = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
+  function checkDirection(el) {
+    var text = el.value || el.getAttribute('value') || '';
+    if (arabicRegex.test(text)) {
+      el.style.direction = 'rtl';
+      el.style.textAlign = 'right';
+      el.style.fontSize = '26px';
+    } else {
+      el.style.direction = 'ltr';
+      el.style.textAlign = 'left';
+      el.style.fontSize = '22px';
+    }
+  }
+
+  function attachListeners(el) {
+    if (el._arabicDirAttached) return;
+    el._arabicDirAttached = true;
+    el.addEventListener('input', function() { checkDirection(el); });
+    el.addEventListener('keyup', function() { checkDirection(el); });
+    el.addEventListener('paste', function() { setTimeout(function() { checkDirection(el); }, 0); });
+    checkDirection(el);
+  }
+
+  function scanAndAttach(root) {
+    var elements = root.querySelectorAll('textarea, input[type="text"], input:not([type])');
+    elements.forEach(function(el) {
+      attachListeners(el);
+    });
+  }
+
+  // Watch for dynamically created elements in #quiz
+  var quiz = document.getElementById('quiz');
+  if (quiz) {
+    scanAndAttach(quiz);
+
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType === 1) {
+            if (node.tagName === 'TEXTAREA' || node.tagName === 'INPUT') {
+              attachListeners(node);
+            }
+            if (node.querySelectorAll) {
+              scanAndAttach(node);
+            }
+          }
+        });
+      });
+    });
+    observer.observe(quiz, { childList: true, subtree: true });
+  }
+
+  setInterval(function() {
+    if (quiz) scanAndAttach(quiz);
+  }, 500);
+})();
+</script>
+<base target="_self">
+<base target="_blank">
+<base target="_blank">
+</head>
+
+<body>
+
+<a class="back" href="index.html">⬅ Bosh sahifa</a>
+
+<!-- GLOBAL TIMER -->
+<div id="globalTimer"></div>
+
+<div class="box">
+
+  <div id="startScreen" class="center-screen">
+    <h2>GRAMMAR TEST</h2>
+    <button id="startBtn" class="start-btn" onclick="start()">Boshlash</button>
+  </div>
+
+  <div id="quiz"></div>
+
+  <!-- TAHLILIY SAVOLLAR UCHUN TEXTAREA -->
+  <div id="analyticalSection" style="display:none; flex-direction:column; gap:20px; width:100%; padding:25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); margin-top: 20px;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:5px;">
+      <div style="width:40px; height:40px; background: rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px;">✍️</div>
+      <div>
+        <div style="color: white; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">TAHLILIY SAVOL</div>
+        <div style="color: rgba(255,255,255,0.7); font-size: 13px;">Batafsil javob yozing</div>
+      </div>
+    </div>
+    <div id="analyticalQuestion" style="background: rgba(255,255,255,0.15); padding: 18px 22px; border-radius: 12px; color: white; font-size: 17px; line-height: 1.6; border-left: 4px solid rgba(255,255,255,0.5);"></div>
+    <textarea id="analyticalEssay" placeholder="Bu yerga javobingizni yozing..." style="font-size: 20px; padding: 18px; border: 2px solid #e0e0e0; border-radius: 12px; background: #f8f9fa; min-height: 180px; resize: vertical; outline: none; transition: all 0.3s ease; font-family: inherit; line-height: 1.6;"></textarea>
+    <button class="btn" onclick="submitAnalytical()" style="align-self: flex-end; background: white; color: #764ba2; font-weight: 700; padding: 12px 32px; border-radius: 25px; border: none; cursor: pointer; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">✓ Yuborish</button>
+  </div>
+<script>
+// Auto-detect text direction for textarea
+(function() {
+  var essay = document.getElementById('essay');
+  if (!essay) return;
+
+  // Arabic Unicode range (including extended Arabic)
+  var arabicRegex = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+
+  function checkDirection() {
+    var text = essay.value;
+    // Check if text contains any Arabic character
+    if (arabicRegex.test(text)) {
+      essay.style.direction = 'rtl';
+      essay.style.textAlign = 'right';
+    } else {
+      essay.style.direction = 'ltr';
+      essay.style.textAlign = 'left';
+    }
+  }
+
+  essay.addEventListener('input', checkDirection);
+  essay.addEventListener('keyup', checkDirection);
+  essay.addEventListener('paste', function() {
+    setTimeout(checkDirection, 0);
+  });
+})();
+</script>
+</div>
+
+<!-- FINISH SYSTEM -->
+<script src="finish.js"></script>
+
+<!-- TIMER SYSTEM -->
+<script src="script.js"></script>
+
+<!-- GRAMMAR LOGIC -->
+<script src="grammar.js"></script>
+
+<script>
+window.addEventListener("load", () => {
+  if (typeof startSharedTimer === "function") {
+    startSharedTimer(); // 3 soat global timer
+  }
+});
+</script>
+
+</body>
+</html>

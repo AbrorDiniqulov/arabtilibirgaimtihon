@@ -189,6 +189,11 @@ app.get('/api/results', authMiddleware, async (req, res) => {
   }
 });
 
+// === YANGI: BARCHA YO'NALISHLARNI index.html GA YO'NALTIRISH (SPA UCHUN) ===
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log('Server ' + PORT + ' portda ishlamoqda');

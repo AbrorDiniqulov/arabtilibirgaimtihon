@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imtihon Natijalari - Admin</title>
+<style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  min-height: 100vh;
+  color: white;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  color: #00ffcc;
+  margin-bottom: 10px;
+  font-size: 32px;
+}
+
+.subtitle {
+  text-align: center;
+  opacity: 0.8;
+  margin-bottom: 30px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: bold;
+  color: #00ffcc;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-bar input, .filter-bar select {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+}
+
+.filter-bar input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-bar button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #00bcd4;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.filter-bar button:hover {
+  background: #0097a7;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255,255,255,0.08);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.results-table th {
+  background: rgba(0,255,204,0.15);
+  padding: 15px;
+  text-align: left;
+  font-size: 14px;
+  color: #00ffcc;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.results-table td {
+  padding: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px;
+}
+
+.results-table tr:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.results-table .status-completed {
+  color: #00ffcc;
+  font-weight: bold;
+}
+
+.results-table .status-pending {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.download-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #00b894;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+.download-btn:hover {
+  background: #00a383;
+}
+
+.delete-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #e74c3c;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  opacity: 0.6;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #00ffcc;
+}
+
+.back-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.date-cell {
+  white-space: nowrap;
+}
+
+.email-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .results-table {
+    font-size: 12px;
+  }
+  .results-table th, .results-table td {
+    padding: 10px 8px;
+  }
+  .download-btn, .delete-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+</style>
+<base target="_self">
+</head>
+<body>
+
+<div class="container">
+  <a href="index.html" class="back-btn" target="_self">⬅ Orqaga</a>
+  <h1>📊 Imtihon Natijalari</h1>
+  <p class="subtitle">Barcha topshirilgan imtihonlar ro'yxati</p>
+
+  <div class="stats" id="stats">
+    <div class="stat-card">
+      <div class="stat-number" id="totalCount">0</div>
+      <div class="stat-label">Jami natijalar</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="todayCount">0</div>
+      <div class="stat-label">Bugun</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="weekCount">0</div>
+      <div class="stat-label">Bu hafta</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="monthCount">0</div>
+      <div class="stat-label">Bu oy</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="🔍 Email yoki ism bo'yicha qidirish..." onkeyup="filterResults()">
+    <select id="statusFilter" onchange="filterResults()">
+      <option value="all">Barcha statuslar</option>
+      <option value="completed">Yakunlangan</option>
+      <option value="pending">Kutilmoqda</option>
+    </select>
+    <button onclick="loadResults()">🔄 Yangilash</button>
+  </div>
+
+  <div id="loading" class="loading">Yuklanmoqda...</div>
+
+  <table class="results-table" id="resultsTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Email</th>
+        <th>Sana</th>
+        <th>Status</th>
+        <th>ZIP fayl</th>
+        <th>Amallar</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody">
+    </tbody>
+  </table>
+
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <h3>📭 Hozircha natijalar yo'q</h3>
+    <p>Imtihon topshirilganidan so'ng natijalar shu yerda ko'rinadi</p>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<script>
+  // Firebase config - BUNI O'ZGARTIRING
+  const firebaseConfig = {
+  apiKey: "SIZNING_API_KEY",
+  authDomain: "SIZNING_PROJECT.firebaseapp.com",
+  projectId: "SIZNING_PROJECT",
+  // ...
+};
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+
+  let allResults = [];
+
+  async function loadResults() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('resultsTable').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'none';
+
+    try {
+      const snapshot = await db.collection('exams').orderBy('timestamp', 'desc').get();
+      allResults = [];
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        allResults.push({
+          id: doc.id,
+          email: data.email || 'Noma'lum',
+          timestamp: data.timestamp ? data.timestamp.toDate() : new Date(),
+          status: data.status || 'completed',
+          fileName: data.fileName || '',
+          downloadURL: data.downloadURL || ''
+        });
+      });
+
+      updateStats();
+      filterResults();
+    } catch (error) {
+      console.error('Xatolik:', error);
+      document.getElementById('loading').textContent = 'Xatolik yuz berdi: ' + error.message;
+    }
+  }
+
+  function updateStats() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    document.getElementById('totalCount').textContent = allResults.length;
+    document.getElementById('todayCount').textContent = allResults.filter(r => r.timestamp >= today).length;
+    document.getElementById('weekCount').textContent = allResults.filter(r => r.timestamp >= weekAgo).length;
+    document.getElementById('monthCount').textContent = allResults.filter(r => r.timestamp >= monthAgo).length;
+  }
+
+  function formatDate(date) {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
+  }
+
+  function filterResults() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+
+    let filtered = allResults.filter(r => {
+      const matchesSearch = r.email.toLowerCase().includes(search);
+      const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+
+    renderResults(filtered);
+  }
+
+  function renderResults(results) {
+    document.getElementById('loading').style.display = 'none';
+
+    if (results.length === 0) {
+      document.getElementById('resultsTable').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('resultsTable').style.display = 'table';
+    document.getElementById('emptyState').style.display = 'none';
+
+    const tbody = document.getElementById('resultsBody');
+    tbody.innerHTML = '';
+
+    results.forEach((r, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${index + 1}</td>
+        <td class="email-cell" title="${r.email}">${r.email}</td>
+        <td class="date-cell">${formatDate(r.timestamp)}</td>
+        <td class="status-${r.status}">${r.status === 'completed' ? '✅ Yakunlangan' : '⏳ Kutilmoqda'}</td>
+        <td>
+          ${r.downloadURL ? `<a href="${r.downloadURL}" target="_self" class="download-btn">⬇ Yuklash</a>` : 'N/A'}
+        </td>
+        <td>
+          <button class="delete-btn" onclick="deleteResult('${r.id}', '${r.fileName}')">🗑 O'chirish</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  async function deleteResult(docId, fileName) {
+    if (!confirm('Haqiqatan ham bu natijani o'chirmoqchimisiz?')) return;
+
+    try {
+      // Firestore'dan o'chirish
+      await db.collection('exams').doc(docId).delete();
+
+      // Storage'dan o'chirish (agar fileName bo'lsa)
+      if (fileName) {
+        try {
+          await storage.ref(fileName).delete();
+        } catch (e) {
+          console.log('Storage fayli topilmadi yoki allaqachon o'chirilgan');
+        }
+      }
+
+      alert('Natija muvaffaqiyatli o'chirildi!');
+      loadResults();
+    } catch (error) {
+      alert('O'chirishda xatolik: ' + error.message);
+    }
+  }
+
+  // Sahifa yuklanganda natijalarni yuklash
+  loadResults();
+</script>
+
+</body>
+</html>
