@@ -25,10 +25,18 @@ if (!fs.existsSync(TEMP_DIR)) {
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI;
+let mongoStatus = 'not configured';
+
 if (MONGODB_URI) {
   mongoose.connect(MONGODB_URI)
-    .then(() => console.log('MongoDB ulandi'))
-    .catch(err => console.log('MongoDB xatosi:', err.message));
+    .then(() => {
+      mongoStatus = 'connected';
+      console.log('MongoDB ulandi');
+    })
+    .catch(err => {
+      mongoStatus = 'error: ' + err.message;
+      console.log('MongoDB xatosi:', err.message);
+    });
 } else {
   console.log('MONGODB_URI o\'rnatilmagan - LocalStorage rejimi');
 }
@@ -86,6 +94,21 @@ const authMiddleware = (req, res, next) => {
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// === YANGI: STATUS TEKSHIRISH ===
+app.get('/api/status', (req, res) => {
+  res.json({
+    server: 'running',
+    mongodb: mongoStatus,
+    mongodb_uri_configured: !!MONGODB_URI,
+    email_configured: !!(EMAIL_USER && EMAIL_PASS),
+    email_user: EMAIL_USER ? 'set' : 'not set',
+    email_pass: EMAIL_PASS ? 'set' : 'not set',
+    email_to: EMAIL_TO,
+    temp_dir: fs.existsSync(TEMP_DIR) ? 'exists' : 'missing',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Register
@@ -189,7 +212,7 @@ app.get('/api/results', authMiddleware, async (req, res) => {
   }
 });
 
-// === YANGI: BARCHA YO'NALISHLARNI index.html GA YO'NALTIRISH (SPA UCHUN) ===
+// === SPA UCHUN: BARCHA YO'NALISHLARNI index.html GA YO'NALTIRISH ===
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
