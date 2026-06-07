@@ -5,6 +5,10 @@
 const ALLOWED_CARD_SUFFIX = "7461";
 const MIN_PAYMENT_AMOUNT = 30000;
 
+// Telegram bot sozlamalari
+const TELEGRAM_BOT_TOKEN = "8979418141:AAFVnQu4u13Xb_p1pudAWKwBH3F8DbCCbgE";
+const TELEGRAM_CHAT_ID = "444362245";
+
 let examTimerInterval = null;
 let examEndTime = null;
 
@@ -51,7 +55,6 @@ function startSharedTimer() {
 }
 
 function startExamTimer() {
-  // Admin panelda timer kerak emas
   if (window.location.pathname.includes('admin')) {
     return;
   }
@@ -62,23 +65,18 @@ function startExamTimer() {
   const timerEl = document.getElementById('globalTimer');
   if (!timerEl) return;
 
-  // Eski intervalni tozalash
   if (examTimerInterval) {
     clearInterval(examTimerInterval);
     examTimerInterval = null;
   }
 
-  // examEndTime o'zgaruvchisini yangilash
   if (savedEndTime) {
     examEndTime = new Date(parseInt(savedEndTime));
   } else {
     examEndTime = null;
   }
 
-  // Birinchi marta ko'rsatish
   updateTimerDisplay();
-
-  // Intervalni boshlash
   examTimerInterval = setInterval(updateTimerDisplay, 1000);
 }
 
@@ -89,9 +87,7 @@ function updateTimerDisplay() {
   const savedDuration = localStorage.getItem("examDuration");
   const savedEndTime = localStorage.getItem('examEndTime');
   const paymentVerified = localStorage.getItem('paymentVerified') === 'true';
-  const user = getCurrentUser();
 
-  // Admin har doim countdown ko'rsatadi
   if (isAdmin()) {
     if (examEndTime) {
       showCountdown(timerEl);
@@ -104,25 +100,19 @@ function updateTimerDisplay() {
     return;
   }
 
-  // Student uchun:
-  // 1. Agar to'lov tasdiqlanmagan bo'lsa -> 00:00:00 (to'xtagan)
   if (!paymentVerified) {
     timerEl.textContent = '00:00:00';
     timerEl.style.color = '#ffd700';
     return;
   }
 
-  // 2. To'lov tasdiqlangan, lekin vaqt o'rnatilmagan -> default 3 soat
   if (!savedDuration && !savedEndTime) {
     timerEl.textContent = '03:00:00';
     timerEl.style.color = '#00ffcc';
     return;
   }
 
-  // 3. To'lov tasdiqlangan, vaqt o'rnatilgan -> countdown
   if (!examEndTime) {
-    // examEndTime o'zgaruvchisi yo'q, lekin localStorage da bor
-    // Yangilab olamiz
     if (savedEndTime) {
       examEndTime = new Date(parseInt(savedEndTime));
     } else {
@@ -245,22 +235,15 @@ async function submitPayment() {
 
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  // ============================================
-  // KARTA TEKSHIRUVI - ENG KUCHLIROQ
-  // ============================================
-
-  // Agar OCR bo'sh yoki xato o'qigan bo'lsa, fallback
   if (!ocrText || ocrText.trim().length < 10) {
     console.log("OCR natija bo'sh yoki juda qisqa. Fallback tekshiruv...");
-    // Fayl nomidan karta raqamini qidirish
     const fileName = file.name.toLowerCase();
     if (fileName.includes('7461') || fileName.includes('openbank') || fileName.includes('chek') || fileName.includes('payment')) {
       console.log("Fayl nomida 7461 yoki to'lov alomatlari topildi");
       checkResult.cardValid = true;
     } else {
-      // Rasmni tekshirish - agar rasm o'lchami va formati to'g'ri bo'lsa
       console.log("OCR bo'sh, lekin rasm yuklandi - tasdiqlash");
-      checkResult.cardValid = true;  // Foydalanuvchi chek yuklaganiga ishonamiz
+      checkResult.cardValid = true;
     }
   } else {
     checkResult.cardValid = checkCardNumber(ocrText);
@@ -270,14 +253,12 @@ async function submitPayment() {
     console.log("Karta 7461 OCR da topilmadi, qo'shimcha tekshiruv...");
   }
 
-  // Summa
   const amountMatches = ocrText.match(/(\d{1,3}(?:\s?\d{3})*(?:[,\.]\d+)?)\s?(?:so\'m|sum|uzs)/gi) 
     || ocrText.match(/(\d{1,3}(?:\s?\d{3})*)\s?(?:000|ming)/gi)
     || ocrText.match(/(\d{4,6})\s?(?:so\'m|sum|uzs|\s)/gi);
 
   if (amountMatches) {
     for (const match of amountMatches) {
-      // "30 000,00" yoki "30000" formatini to'g'ri parse qilish
       const cleanNum = match.replace(/\s/g, '').replace(/[,\.].*/, '');
       const num = parseInt(cleanNum);
       console.log("Summa topildi:", match, "->", num);
@@ -288,7 +269,6 @@ async function submitPayment() {
     }
   }
 
-  // Agar OCR bo'sh bo'lsa va fayl nomida summa bo'lsa
   if (!checkResult.amountValid) {
     const fileName = file.name.toLowerCase();
     const fileAmountMatch = fileName.match(/(\d{2,6})/);
@@ -301,10 +281,8 @@ async function submitPayment() {
     }
   }
 
-  // Sana
   checkResult.dateValid = true;
 
-  // Bir martadan ko'p
   const usedReceipts = JSON.parse(localStorage.getItem('usedPaymentReceipts') || '[]');
   const fileHash = await getFileHash(file);
   if (usedReceipts.includes(fileHash)) {
@@ -323,7 +301,6 @@ async function submitPayment() {
     return;
   }
 
-  // TASDIQLANDI
   showPaymentStatus('\u2705 Tasdiqlandi!', 'success');
 
   usedReceipts.push(fileHash);
@@ -341,48 +318,34 @@ async function submitPayment() {
 
   localStorage.setItem('paymentVerified', 'true');
 
-  // Vaqt o'rnatish - examDuration dan foydalanish
   localStorage.removeItem('examEndTime');
   const savedDuration = localStorage.getItem("examDuration");
   const examDuration = savedDuration ? parseInt(savedDuration) : (3 * 60 * 60 * 1000);
   const endTime = Date.now() + examDuration;
   localStorage.setItem('examEndTime', endTime);
 
-  // examEndTime o'zgaruvchisini ham yangilash
   examEndTime = new Date(endTime);
 
-  // Timer ni qayta boshlash
   startExamTimer();
 
-  // Avtomatik o'tish
   setTimeout(function() {
     showMainScreen();
   }, 1000);
 }
 
 // ============================================
-// KARTA RAQAMINI TEKSHIRISH - ENG KUCHLIROQ
+// KARTA RAQAMINI TEKSHIRISH
 // ============================================
-// ============================================
-// KARTA RAQAMINI TEKSHIRISH - FAQAT QABUL QILUVCHI KARTASI
-// ============================================
-// ============================================
-// KARTA RAQAMINI TEKSHIRISH - FAQAT QABUL QILUVCHI KARTASI
-n// ============================================
 function checkCardNumber(ocrText) {
   if (!ocrText || typeof ocrText !== 'string') return false;
 
   const text = ocrText.toLowerCase();
   const lines = text.split('\n');
 
-  // 1. "qabul qiluvchi kartasi" qatorini va UNDAN KEYINGI qatorni tekshirish
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].toLowerCase().trim();
 
-    // "qabul qiluvchi kartasi" yoki "qabul qiluvchi" so'zi bor qatorni topish
     if (line.includes('qabul') && !line.includes('yuboruvchi')) {
-
-      // A) Karta raqami SHU QATORDA bo'lishi mumkin (masalan: "qabul qiluvchi kartasi 9860*******7461")
       if (line.includes('7461')) {
         const patterns = [
           /\d{2,4}[^\d\w\s]{0,20}7461/,
@@ -400,10 +363,8 @@ function checkCardNumber(ocrText) {
         }
       }
 
-      // B) Karta raqami KEYINGI QATORDA bo'lishi mumkin (masalan: "qabul qiluvchi kartasi" / "9860*******7461")
       if (i + 1 < lines.length) {
         const nextLine = lines[i + 1].toLowerCase().trim();
-        // "yuboruvchi" so'zi bor qatorlarni o'tkazib yuborish
         if (!nextLine.includes('yuboruvchi')) {
           if (nextLine.includes('7461')) {
             const patterns = [
@@ -426,16 +387,12 @@ function checkCardNumber(ocrText) {
     }
   }
 
-  // 2. Fallback: umumiy qidirish (agar "qabul qiluvchi" topilmasa)
   console.log("Qabul qiluvchi qatori aniqlanmadi, umumiy tekshiruv...");
 
   for (const line of lines) {
     const cleanLine = line.toLowerCase().trim();
-
-    // "yuboruvchi" so'zi bor qatorlarni o'tkazib yuborish
     if (cleanLine.includes('yuboruvchi')) continue;
 
-    // Qolgan qatorlarda 7461 ni qidirish
     if (cleanLine.includes('7461')) {
       const endPatterns = [
         /\d{2,4}[^\d\w\s]{0,20}7461/,
@@ -457,7 +414,9 @@ function checkCardNumber(ocrText) {
 
   console.log("❌ Qabul qiluvchi kartasida 7461 topilmadi");
   return false;
-}async function getFileHash(file) {
+}
+
+async function getFileHash(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -508,17 +467,62 @@ function showMainScreen() {
   }
 }
 
+// ============================================
+// ISTISNO TEKSHIRUVI
+// ============================================
 async function checkExemptStatus(email) {
+  if (!email) return false;
+  
   try {
     const localExempts = JSON.parse(localStorage.getItem('exemptLogins') || '[]');
-    return localExempts.find(e => e.email === email) !== undefined;
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    const isExempt = localExempts.some(e => {
+      if (!e || !e.email) return false;
+      return e.email.toLowerCase().trim() === normalizedEmail;
+    });
+    
+    console.log('Istisno tekshiruvi:', email, '->', isExempt ? 'ISTISNO' : 'ISTISNO EMAS');
+    return isExempt;
   } catch (e) {
+    console.error('Istisno tekshiruvi xatosi:', e);
     return false;
   }
 }
 
 // ============================================
-// SUBMIT ALL - REPLACE OLD ANSWERS
+// TELEGRAM BOT ORQALI YUBORISH
+// ============================================
+async function sendToTelegram(zipBlob, fileName, caption) {
+  const formData = new FormData();
+  formData.append("chat_id", TELEGRAM_CHAT_ID);
+  formData.append("document", zipBlob, fileName);
+  formData.append("caption", caption);
+  
+  console.log("Telegramga yuborilmoqda...", fileName);
+  
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
+      method: "POST",
+      body: formData
+    });
+    
+    const data = await response.json();
+    console.log("Telegram javob:", data);
+    
+    if (data.ok) {
+      return { success: true, message: "\u2705 Javoblar muvaffaqiyatli yuborildi!" };
+    } else {
+      return { success: false, message: "\u274C Telegram xatosi: " + data.description };
+    }
+  } catch (error) {
+    console.error("Telegram yuborishda xato:", error);
+    return { success: false, message: "\u274C Internet xatosi: " + error.message };
+  }
+}
+
+// ============================================
+// SUBMIT ALL - TELEGRAMGA YUBORISH
 // ============================================
 
 async function submitAll() {
@@ -531,11 +535,6 @@ async function submitAll() {
   }
 
   try {
-    // ============================================
-    // 1. AVVAL BARCHA MA'LUMOTLARNI YIG'ISH
-    // ============================================
-
-    // examAnswers ni avval o'qib olish (tozalashdan OLDIN!)
     let examAnswers = JSON.parse(localStorage.getItem("examAnswers") || "{}");
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 
@@ -545,17 +544,14 @@ async function submitAll() {
       return;
     }
 
-    // IndexedDB dan speaking audio larni olish
     const speakingAudioFromDB = await getAllSpeakingAudioFromIndexedDB();
-
-    // ZIP yaratish
     const zip = new JSZip();
 
     // USER INFO
     let userInfoTxt = "FOYDALANUVCHI\n====================\n";
-    userInfoTxt += `Ism: ${currentUser.name || "—"}\n`;
-    userInfoTxt += `Email: ${currentUser.email || "—"}\n`;
-    userInfoTxt += `Telefon: ${currentUser.phone || "—"}\n`;
+    userInfoTxt += `Ism: ${currentUser.name || "\u2014"}\n`;
+    userInfoTxt += `Email: ${currentUser.email || "\u2014"}\n`;
+    userInfoTxt += `Telefon: ${currentUser.phone || "\u2014"}\n`;
     userInfoTxt += `Vaqt: ${new Date().toLocaleString()}\n\n`;
     zip.file("user_info.txt", userInfoTxt);
 
@@ -563,7 +559,7 @@ async function submitAll() {
     const grammar = safeArray(examAnswers.grammar);
     let grammarTxt = "GRAMMAR\n====================\n";
     grammar.forEach((q, i) => {
-      grammarTxt += `${i + 1}. ${q.question || "—"}\n   Javob: ${q.answer || "—"}\n\n`;
+      grammarTxt += `${i + 1}. ${q.question || "\u2014"}\n   Javob: ${q.answer || "\u2014"}\n\n`;
     });
     zip.file("grammar.txt", grammarTxt);
 
@@ -571,7 +567,7 @@ async function submitAll() {
     const listening = safeArray(examAnswers.listening);
     let listeningTxt = "LISTENING\n====================\n";
     listening.forEach((q, i) => {
-      listeningTxt += `${i + 1}. ${q.question || "—"}\n   Javob: ${q.answer || "—"}\n\n`;
+      listeningTxt += `${i + 1}. ${q.question || "\u2014"}\n   Javob: ${q.answer || "\u2014"}\n\n`;
     });
     zip.file("listening.txt", listeningTxt);
 
@@ -579,7 +575,7 @@ async function submitAll() {
     const writing = safeArray(examAnswers.writing);
     let writingTxt = "WRITING\n====================\n";
     writing.forEach((q, i) => {
-      writingTxt += `${i + 1}. ${q.question || q.task || "—"}\n   Javob: ${q.answer || "—"}\n   Level: ${q.level || "—"}\n\n`;
+      writingTxt += `${i + 1}. ${q.question || q.task || "\u2014"}\n   Javob: ${q.answer || "\u2014"}\n   Level: ${q.level || "\u2014"}\n\n`;
     });
     zip.file("writing.txt", writingTxt);
 
@@ -590,26 +586,24 @@ async function submitAll() {
       if (!passage || !Array.isArray(passage.questions)) return;
       readingTxt += `PASSAGE ${i + 1}\n`;
       passage.questions.forEach((q, j) => {
-        readingTxt += `${j + 1}. ${q.question || "—"}\n   Javob: ${q.answer || "—"}\n\n`;
+        readingTxt += `${j + 1}. ${q.question || "\u2014"}\n   Javob: ${q.answer || "\u2014"}\n\n`;
       });
       readingTxt += "--------------------\n";
     });
     zip.file("reading.txt", readingTxt);
 
-    // SPEAKING - savollar matn formatda
+    // SPEAKING
     const speaking = safeArray(examAnswers.speaking);
     let speakingTxt = "SPEAKING\n====================\n";
     speaking.forEach((q, i) => {
-      speakingTxt += `${i + 1}. ${q.question || "—"}\n   Daraja: ${q.difficulty || "—"}\n\n`;
+      speakingTxt += `${i + 1}. ${q.question || "\u2014"}\n   Daraja: ${q.difficulty || "\u2014"}\n\n`;
     });
     zip.file("speaking.txt", speakingTxt);
 
-    // SPEAKING AUDIO - WEBM formatda (IndexedDB dan)
-    // Faqat javob berilgan savollarning audio fayllari
-    let audioFileIndex = 1;  // ZIP ichida 1-based numbering
+    // SPEAKING AUDIO
+    let audioFileIndex = 1;
 
     if (speakingAudioFromDB && speakingAudioFromDB.length > 0) {
-      // Sort by id to maintain order
       const sortedAudio = speakingAudioFromDB.sort((a, b) => {
         const idA = parseInt((a.id || '').replace('audio_', '')) || 0;
         const idB = parseInt((b.id || '').replace('audio_', '')) || 0;
@@ -624,7 +618,6 @@ async function submitAll() {
       });
     }
 
-    // Fallback: localStorage dan audio base64 (agar IndexedDB bo'sh bo'lsa)
     if (audioFileIndex === 1) {
       const speakingAnswers = safeArray(examAnswers.speaking);
       speakingAnswers.forEach((q) => {
@@ -638,7 +631,7 @@ async function submitAll() {
       });
     }
 
-    // PHOTO - PNG formatda
+    // PHOTO
     let photoAdded = false;
     if (examAnswers.photo) {
       const base64Data = examAnswers.photo.split(",")[1];
@@ -655,7 +648,7 @@ async function submitAll() {
       }
     }
 
-    // PAYMENT RECEIPT - PNG formatda
+    // PAYMENT RECEIPT
     if (currentUser && currentUser.email) {
       const paymentData = JSON.parse(localStorage.getItem("paymentReceipt_" + currentUser.email) || "null");
       if (paymentData && paymentData.fileData) {
@@ -667,57 +660,43 @@ async function submitAll() {
       }
     }
 
-    // ============================================
-    // 2. ZIP YUKLASH
-    // ============================================
+    // ZIP YARATISH VA TELEGRAMGA YUBORISH
     const blob = await zip.generateAsync({ type: "blob" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "EXAM_RESULT_" + (currentUser.email || "user") + ".zip";
-    a.click();
-
-    // ============================================
-    // 3. FIREBASE GA YUKLASH
-    // ============================================
-    if (typeof storage !== 'undefined' && storage.ref) {
-      try {
-        const timestamp = Date.now();
-        const fileName = `exams/${currentUser.email || 'unknown'}_${timestamp}.zip`;
-        const storageRef = storage.ref(fileName);
-        await storageRef.put(blob);
-        const downloadURL = await storageRef.getDownloadURL();
-
-        if (typeof db !== 'undefined' && db.collection) {
-          await db.collection('exams').add({
-            email: currentUser.email || 'unknown',
-            userName: currentUser.name || 'Unknown',
-            fileName: fileName,
-            downloadURL: downloadURL,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'completed'
-          });
-        }
-      } catch (fbErr) {
-        console.warn('Firebase xatosi:', fbErr.message);
-      }
+    const fileName = "EXAM_RESULT_" + (currentUser.email || "user") + ".zip";
+    
+    const caption = `\uD83D\uDCDA Yangi imtihon javoblari!\n\n` +
+      `\uD83D\uDC64 Ism: ${currentUser.name || 'Noma\u2018lum'}\n` +
+      `\uD83D\uDCE7 Email: ${currentUser.email || 'Noma\u2018lum'}\n` +
+      `\uD83D\uDCF1 Telefon: ${currentUser.phone || 'Noma\u2018lum'}\n` +
+      `\uD83D\uDCC5 Sana: ${new Date().toLocaleString('uz-UZ')}\n\n` +
+      `\uD83D\uDCCA Natijalar:\n` +
+      `\u2022 Grammar: ${grammar.length}/40\n` +
+      `\u2022 Reading: ${reading.length}/40\n` +
+      `\u2022 Listening: ${listening.length}/40\n` +
+      `\u2022 Writing: ${writing.length}/2\n` +
+      `\u2022 Speaking: ${audioFileIndex - 1}/6`;
+    
+    // TELEGRAMGA YUBORISH (KOMPYUTERGA EMAS!)
+    const telegramResult = await sendToTelegram(blob, fileName, caption);
+    
+    if (telegramResult.success) {
+      alert(telegramResult.message);
+    } else {
+      alert(telegramResult.message + "\n\nJavoblarni qo'lda saqlab qoling.");
     }
 
-    // ============================================
-    // 4. ESKI JAVOBLARNI TOZALASH (ZIP dan KEYIN!)
-    // ============================================
+    // ESKI JAVOBLARNI TOZALASH
     localStorage.removeItem("examAnswers");
-    // Yangi bo'sh examAnswers yaratish
     localStorage.setItem("examAnswers", JSON.stringify({}));
-
-    // IndexedDB dan speaking audio larni tozalash
     await clearSpeakingAudioIndexedDB();
 
-    // localStorage dan speaking audio larni tozalash
     for (let i = 0; i < 100; i++) {
       localStorage.removeItem('speaking_audio_' + i);
     }
 
-    alert("\u2705 Javoblar yuborildi!");
+    if (typeof showFinishScreen === 'function') {
+      showFinishScreen();
+    }
 
   } catch (error) {
     console.error("submitAll xatosi:", error);
@@ -807,14 +786,15 @@ function safeArray(val) {
 }
 
 // ============================================
-// PAGE INIT
+// PAGE INIT - ISTISNO TEKSHIRUVI BILAN
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   const paymentSection = document.getElementById('paymentSection');
   const mainScreen = document.getElementById('mainScreen');
 
   if (paymentSection && mainScreen) {
+    // Boshlang'ich holat
     paymentSection.style.display = 'block';
     mainScreen.style.display = 'none';
 
@@ -822,15 +802,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const user = getCurrentUser();
 
     if (user && user.email) {
-      checkExemptStatus(user.email).then(isExempt => {
-        if (isExempt || paymentVerified) {
-          paymentSection.style.display = 'none';
-          mainScreen.style.display = 'block';
-          startExamTimer();
+      // ISTISNO TEKSHIRUVI - BIRINCHI O'RINDA!
+      const isExempt = await checkExemptStatus(user.email);
+      
+      if (isExempt) {
+        console.log('Istisno foydalanuvchi:', user.email);
+        
+        // To'lovni avtomatik tasdiqlash
+        localStorage.setItem('paymentVerified', 'true');
+        
+        // Vaqt o'rnatish
+        localStorage.removeItem('examEndTime');
+        const savedDuration = localStorage.getItem("examDuration");
+        const examDuration = savedDuration ? parseInt(savedDuration) : (3 * 60 * 60 * 1000);
+        const endTime = Date.now() + examDuration;
+        localStorage.setItem('examEndTime', endTime);
+        examEndTime = new Date(endTime);
+        
+        // Payment section ni yashirish va main screen ni ko'rsatish
+        paymentSection.style.display = 'none';
+        mainScreen.style.display = 'block';
+        startExamTimer();
+        
+        // Istisno xabarini ko'rsatish
+        const statusEl = document.getElementById('paymentStatus');
+        if (statusEl) {
+          statusEl.className = 'payment-status success';
+          statusEl.textContent = '\u2705 Siz istisno ro\u2018yxatidasiz. To\u2018lov talab qilinmaydi.';
+          statusEl.style.display = 'block';
+          
+          setTimeout(() => {
+            statusEl.style.display = 'none';
+          }, 3000);
         }
-      }).catch(err => {
-        console.error('Istisno xatosi:', err);
-      });
+        
+        return; // Payment tekshiruvini o'tkazib yuborish
+      }
+      
+      // ISTISNO EMAS - payment tekshiruvi
+      if (paymentVerified) {
+        paymentSection.style.display = 'none';
+        mainScreen.style.display = 'block';
+        startExamTimer();
+      }
     }
   }
 
