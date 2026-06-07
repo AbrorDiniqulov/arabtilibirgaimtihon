@@ -176,6 +176,28 @@ function doRegister() {
 }
 
 
+/* ================= ADMIN MA'LUMOTLARINI YANGILASH ================= */
+
+function updateAdminCredentials() {
+  let users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+  
+  // Eski adminni o'chirish
+  users = users.filter(u => u.role !== "admin");
+  
+  // Yangi adminni qo'shish
+  users.push({
+    name: "Admin",
+    email: "abroradmin@gmail.com",
+    phone: "+998941957364",
+    password: "abroradmin123",
+    role: "admin"
+  });
+  
+  localStorage.setItem("registeredUsers", JSON.stringify(users));
+  console.log("Admin ma'lumotlari yangilandi");
+}
+
+
 /* ================= LOGIN (EMAIL bilan) ================= */
 
 function doLogin() {
@@ -185,19 +207,11 @@ function doLogin() {
 
   let users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
 
-  // Admin avtomatik yaratish
-  const adminExists = users.find(u => u.role === "admin");
-
-  if (!adminExists) {
-    users.push({
-      name: "Admin",
-      email: "abroradmin@gmail.com",
-      phone: "+998941957364",
-      password: "abroradmin123",
-      role: "admin"
-    });
-    localStorage.setItem("registeredUsers", JSON.stringify(users));
-  }
+  // Admin ma'lumotlarini har safar yangilash
+  updateAdminCredentials();
+  
+  // Yangilangan users ro'yxatini qayta olish
+  users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
 
   const user = users.find(
     u => u.email === email && u.password === pass
@@ -224,21 +238,16 @@ function doLogin() {
   }
 
   // HAR SAFAR LOGIN QILGANDA YANGIDAN VAQT BOSHLANSIN
-  // Eski vaqt to'liq tozalanadi
   localStorage.removeItem('examEndTime');
   localStorage.removeItem('paymentVerified');
 
   // TIMER FAQAT STUDENT UCHUN
   if (user.role !== "admin") {
-    // Admin o'rnatgan vaqtni olish (millisekundlarda)
     const savedDuration = localStorage.getItem("examDuration");
     console.log("Admin o'rnatgan vaqt (ms):", savedDuration);
 
     const examDuration = savedDuration ? parseInt(savedDuration) : (3 * 60 * 60 * 1000);
     console.log("Foydalaniladigan vaqt (ms):", examDuration, "=", examDuration / (60*60*1000), "soat");
-
-    // Vaqt HALI BOSHLANMAGAN - faqat payment tasdiqlangandan keyin
-    // examEndTime hali saqlanmaydi, faqat examDuration saqlanadi
     console.log("Vaqt to'lov tasdiqlangandan keyin boshlanadi");
   }
 
@@ -251,7 +260,6 @@ function doLogin() {
     const isExempt = exemptLogins.find(e => e.email === user.email) !== undefined;
     if (isExempt) {
       localStorage.setItem('paymentVerified', 'true');
-      // Vaqt o'rnatish
       localStorage.removeItem('examEndTime');
       const savedDuration = localStorage.getItem("examDuration");
       const examDuration = savedDuration ? parseInt(savedDuration) : (3 * 60 * 60 * 1000);
@@ -266,19 +274,15 @@ function doLogin() {
 /* ================= ESKI JAVOBLARNI TOZALASH ================= */
 
 function clearOldExamData() {
-  // Barcha eski javoblarni tozalash
   localStorage.removeItem("examAnswers");
   localStorage.removeItem("listeningAnswers");
 
-  // Eski speaking audio larni tozalash
   for (let i = 0; i < 100; i++) {
     localStorage.removeItem('speaking_audio_' + i);
   }
 
-  // IndexedDB dan speaking audio larni tozalash
   clearSpeakingAudioIndexedDB();
 
-  // Eski vaqt va to'lov ma'lumotlarini tozalash
   localStorage.removeItem('examEndTime');
   localStorage.removeItem('paymentVerified');
 
@@ -320,6 +324,9 @@ function clearSpeakingAudioIndexedDB() {
 
 /* ================= SAHIFA YUKLANGANDA TEKSHIRUV ================= */
 document.addEventListener("DOMContentLoaded", function() {
+  // Admin ma'lumotlarini har safar yangilash
+  updateAdminCredentials();
+  
   const currentUser = localStorage.getItem("currentUser");
   if (currentUser) {
     const user = JSON.parse(currentUser);
