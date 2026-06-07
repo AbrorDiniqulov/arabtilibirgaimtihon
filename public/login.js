@@ -191,9 +191,9 @@ function doLogin() {
   if (!adminExists) {
     users.push({
       name: "Admin",
-      email: "admin@test.com",
-      phone: "+998901234567",
-      password: "admin123",
+      email: "abroradmin@gmail.com",
+      phone: "+998941957364",
+      password: "abroradmin123",
       role: "admin"
     });
     localStorage.setItem("registeredUsers", JSON.stringify(users));
