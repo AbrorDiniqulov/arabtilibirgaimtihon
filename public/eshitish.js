@@ -1,5 +1,4 @@
-let listeningData = JSON.parse(localStorage.getItem("listening")) || [];
-
+let listeningData = [];
 const audio = document.getElementById("audio");
 const quiz = document.getElementById("quiz");
 const startBtn = document.getElementById("startBtn");
@@ -12,6 +11,53 @@ let step = 0;
 let currentQuestion = 0;
 
 let userAnswers = JSON.parse(localStorage.getItem("listeningAnswers") || "[]");
+
+/* ================= ADMIN PANELDAN SAVOLLARNI YUKLASH ================= */
+async function loadListeningData() {
+  try {
+    // Admin paneldan eshitish savollarini yuklash
+    const questions = await QuestionsDB.getQuestions('listening');
+    console.log('Admin paneldan eshitish savollari yuklandi:', questions.length);
+    
+    // Savollarni formatlash (admin format -> eshitish format)
+    listeningData = questions.map(q => {
+      // Audio URL ni topish (agar admin panelda saqlangan bo'lsa)
+      let audioUrl = q.audio || q.audioUrl || '';
+      
+      // Options ni formatlash
+      let opts = [];
+      if (q.options) {
+        if (q.options.A) opts.push(q.options.A);
+        if (q.options.B) opts.push(q.options.B);
+        if (q.options.C) opts.push(q.options.C);
+        if (q.options.D) opts.push(q.options.D);
+      }
+      if (Array.isArray(q.options)) {
+        opts = q.options;
+      }
+
+      return {
+        audio: audioUrl,
+        section: q.section || 'easy',
+        questions: [{
+          question: q.text || q.question,
+          options: opts
+        }]
+      };
+    });
+
+    // Agar admin panelda savol bo'lmasa, eski localStorage ga fallback
+    if (listeningData.length === 0) {
+      console.log('Admin panelda savollar yoq, eski localStorage ga fallback');
+      listeningData = JSON.parse(localStorage.getItem("listening") || "[]");
+    }
+
+  } catch (error) {
+    console.error('Eshitish savollarini yuklashda xatolik:', error);
+    // Fallback: eski localStorage
+    listeningData = JSON.parse(localStorage.getItem("listening") || "[]");
+  }
+}
 
 function getCurrentItem() {
   return listeningData[sectionIndex];
@@ -40,7 +86,16 @@ function startListening() {
 
   audio.style.display = "block";
   quiz.style.display = "none";
-  audio.src = currentItem.audio;
+  
+  // Audio URL ni tekshirish
+  if (currentItem.audio) {
+    audio.src = currentItem.audio;
+  } else {
+    console.warn('Audio URL topilmadi, faqat savollar ko\'rsatiladi');
+    showQuiz(); // Audio bo'lmasa, to'g'ridan-to'g'ri savollarga o'tish
+    return;
+  }
+  
   step = 0;
   currentQuestion = 0;
   playFirst();
@@ -50,14 +105,21 @@ function playFirst() {
   audio.pause();
   audio.currentTime = 0;
   audio.load();
-  audio.play().catch(() => {});
+  audio.play().catch((e) => {
+    console.error('Audio play xatolik:', e);
+    // Audio play xatolik bo'lsa, savollarga o'tish
+    showQuiz();
+  });
 }
 
 function playSecond() {
   audio.pause();
   audio.currentTime = 0;
   audio.load();
-  audio.play().catch(() => {});
+  audio.play().catch((e) => {
+    console.error('Audio play xatolik:', e);
+    showQuiz();
+  });
 }
 
 audio.addEventListener("ended", () => {
@@ -85,11 +147,17 @@ function renderQuestion() {
     return;
   }
 
+  // Options ni tekshirish va formatlash
+  let options = q.options || [];
+  if (typeof options === 'string') {
+    options = options.split(/[;,]/).map(v => v.trim()).filter(v => v);
+  }
+
   quiz.innerHTML = `
     <div class="question-box">
-      <div class="q-title">${currentQuestion + 1}. ${q.question}</div>
+      <div class="q-title">${currentQuestion + 1}. ${q.question || q.text}</div>
       <div class="options">
-        ${q.options.map((opt) => `
+        ${options.map((opt) => `
           <button class="option-btn" onclick="selectAnswer(this.dataset.value)" data-value="${opt}">${opt}</button>
         `).join("")}
       </div>
@@ -102,9 +170,9 @@ function selectAnswer(val) {
   if (!q) return;
 
   const answerObj = {
-    question: q.question,
+    question: q.question || q.text,
     answer: val,
-    section: currentItem.section
+    section: currentItem.section || sections[sectionIndex] || 'unknown'
   };
 
   userAnswers.push(answerObj);
@@ -151,8 +219,19 @@ function nextAudio() {
   quiz.style.display = "none";
   currentQuestion = 0;
   step = 0;
-  audio.src = currentItem.audio;
-  playFirst();
+  
+  if (currentItem.audio) {
+    audio.src = currentItem.audio;
+    playFirst();
+  } else {
+    // Audio bo'lmasa, to'g'ridan-to'g'ri savollarga o'tish
+    showQuiz();
+  }
 }
 
-
+/* ================= INIT ================= */
+// Sahifa yuklanganda savollarni yuklash
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadListeningData();
+  console.log('Eshitish ma\'lumotlari yuklandi:', listeningData.length, 'ta');
+});

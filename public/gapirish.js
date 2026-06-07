@@ -2,15 +2,7 @@ let mediaRecorder;
 let chunks = [];
 let index = 0;
 
-let allQuestions = JSON.parse(localStorage.getItem("speakingQuestions")) || [];
-
-let questions = allQuestions
-  .filter(q => q.active)
-  .map(q => ({
-    question: q.question,
-    difficulty: q.difficulty,
-    timer: q.timer
-  }));
+let questions = [];
 
 const DB_NAME = "examDB";
 const STORE_NAME = "speakingAudio";
@@ -33,6 +25,74 @@ async function clearOldAudio() {
   const db = await openDB();
   const tx = db.transaction(STORE_NAME, "readwrite");
   tx.objectStore(STORE_NAME).clear();
+}
+
+/* ================= ADMIN PANELDAN SAVOLLARNI YUKLASH ================= */
+async function loadSpeakingQuestions() {
+  try {
+    // Admin paneldan gapirish savollarini yuklash
+    const allQuestions = await QuestionsDB.getQuestions('speaking');
+    console.log('Admin paneldan gapirish savollari yuklandi:', allQuestions.length);
+    
+    // Savollarni formatlash (admin format -> gapirish format)
+    questions = allQuestions
+      .filter(q => q.active !== false) // active bo'lmasa ham ko'rsatish (default true)
+      .map(q => {
+        // Timer ni parse qilish
+        let timer = { prep: 30, answer: 60 }; // default
+        if (q.timer) {
+          if (typeof q.timer === 'string') {
+            const parts = q.timer.split(',').map(v => parseInt(v.trim()));
+            if (parts.length >= 2) {
+              timer = { prep: parts[0], answer: parts[1] };
+            }
+          } else if (typeof q.timer === 'object') {
+            timer = {
+              prep: parseInt(q.timer.prep) || 30,
+              answer: parseInt(q.timer.answer) || 60
+            };
+          }
+        }
+        // Eski format: "prep:30,answer:60" yoki "30,60"
+        if (q.prepTime && q.answerTime) {
+          timer = {
+            prep: parseInt(q.prepTime) || 30,
+            answer: parseInt(q.answerTime) || 60
+          };
+        }
+
+        return {
+          question: q.text || q.question,
+          difficulty: q.difficulty || 'medium',
+          timer: timer
+        };
+      });
+
+    // Agar admin panelda savol bo'lmasa, eski localStorage ga fallback
+    if (questions.length === 0) {
+      console.log('Admin panelda savollar yoq, eski localStorage ga fallback');
+      const oldQuestions = JSON.parse(localStorage.getItem("speakingQuestions")) || [];
+      questions = oldQuestions
+        .filter(q => q.active)
+        .map(q => ({
+          question: q.question,
+          difficulty: q.difficulty,
+          timer: q.timer
+        }));
+    }
+
+  } catch (error) {
+    console.error('Gapirish savollarini yuklashda xatolik:', error);
+    // Fallback: eski localStorage
+    const oldQuestions = JSON.parse(localStorage.getItem("speakingQuestions")) || [];
+    questions = oldQuestions
+      .filter(q => q.active)
+      .map(q => ({
+        question: q.question,
+        difficulty: q.difficulty,
+        timer: q.timer
+      }));
+  }
 }
 
 async function start() {
@@ -125,7 +185,7 @@ function startRecording(q) {
         const answerObj = {
           question: q.question,
           difficulty: q.difficulty,
-          audioIndex: index  // AUDIO INDEX QO'SHILDI
+          audioIndex: index
         };
 
         // IndexedDB ga saqlash
@@ -181,3 +241,10 @@ function startRecording(q) {
       setTimeout(nextQuestion, 1000);
     });
 }
+
+/* ================= INIT ================= */
+// Sahifa yuklanganda savollarni yuklash
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadSpeakingQuestions();
+  console.log('Gapirish savollari yuklandi:', questions.length, 'ta');
+});

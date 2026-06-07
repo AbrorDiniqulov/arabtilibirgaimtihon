@@ -2,35 +2,48 @@ let current = 0;
 let questions = [];
 
 /* ================= START ================= */
-function start() {
-
+async function start() {
   current = 0;
 
   document.getElementById("startScreen").style.display = "none";
 
-  const all =
-    JSON.parse(localStorage.getItem("grammarQuestions") || "[]");
+  // Admin paneldan savollarni yuklash
+  let all = [];
+  try {
+    all = await QuestionsDB.getQuestions('grammar');
+    console.log('Admin paneldan savollar yuklandi:', all.length);
+  } catch (error) {
+    console.error('Savollarni yuklashda xatolik:', error);
+    // Fallback: eski localStorage
+    all = JSON.parse(localStorage.getItem("grammarQuestions") || "[]");
+  }
 
+  // Savollarni formatlash (admin.js formatiga mos)
   const mcq = all.filter(q =>
-    q && q.active && Array.isArray(q.options) && q.options.length
+    q && q.options && (q.options.A || q.options.B || q.options.C || q.options.D)
   );
 
   const text = all.filter(q =>
-    q && q.active && (!q.options || q.options.length === 0)
+    q && (!q.options || (!q.options.A && !q.options.B))
   );
 
   questions = [...mcq, ...text].map(q => {
-
-    let opts = q.options;
-
-    if (typeof opts === "string") {
-      opts = opts.split(/[;,]/).map(v => v.trim());
+    // Admin panel format: {A, B, C, D} -> [A, B, C, D]
+    let opts = [];
+    if (q.options) {
+      if (q.options.A) opts.push(q.options.A);
+      if (q.options.B) opts.push(q.options.B);
+      if (q.options.C) opts.push(q.options.C);
+      if (q.options.D) opts.push(q.options.D);
+    }
+    
+    // Eski format support: options array
+    if (Array.isArray(q.options)) {
+      opts = q.options;
     }
 
-    if (!Array.isArray(opts)) opts = [];
-
     return {
-      question: q.question,
+      question: q.text || q.question,
       options: opts,
       correct: q.correct || 0
     };
@@ -46,7 +59,6 @@ function start() {
 
 /* ================= SHOW ================= */
 function showQuestion() {
-
   const box = document.getElementById("quiz");
 
   if (current >= questions.length) {
@@ -57,50 +69,42 @@ function showQuestion() {
   const q = questions[current];
 
   if (!q.options.length) {
-
+    // Matnli savol (ochiq javob)
     box.innerHTML = `
       <div class="grammar-screen">
-
         <div class="grammar-content">
-
           <div class="grammar-question">
             ${current + 1}. ${q.question}
           </div>
-
           <textarea id="textAnswer"></textarea>
-
         </div>
-
         <div class="grammar-footer">
           <button onclick="saveText()">Keyingi</button>
         </div>
-
       </div>
     `;
-
     return;
   }
 
+  // MCQ savol (A, B, C, D)
+  const letters = ['A', 'B', 'C', 'D'];
+  let optionsHtml = '';
+  q.options.forEach((opt, idx) => {
+    if (opt) {
+      optionsHtml += `<button onclick="answer(${idx})">${letters[idx]}) ${opt}</button>`;
+    }
+  });
+
   box.innerHTML = `
     <div class="grammar-screen">
-
       <div class="grammar-content">
-
         <div class="grammar-question">
           ${current + 1}. ${q.question}
         </div>
-
         <div class="grammar-options">
-
-          <button onclick="answer(0)">A) ${q.options[0] || "-"}</button>
-          <button onclick="answer(1)">B) ${q.options[1] || "-"}</button>
-          <button onclick="answer(2)">C) ${q.options[2] || "-"}</button>
-          <button onclick="answer(3)">D) ${q.options[3] || "-"}</button>
-
+          ${optionsHtml}
         </div>
-
       </div>
-
     </div>
   `;
 }
@@ -116,9 +120,8 @@ function saveText() {
   saveAnswer(val);
 }
 
-/* ================= SAVE (SYNC FIX FOR DOWNLOAD.JS) ================= */
+/* ================= SAVE ================= */
 function saveAnswer(val) {
-
   const q = questions[current];
 
   const answerObj = {
@@ -134,7 +137,6 @@ function saveAnswer(val) {
   }
 
   exam.grammar.push(answerObj);
-
   localStorage.setItem("examAnswers", JSON.stringify(exam));
 
   current++;
@@ -143,7 +145,6 @@ function saveAnswer(val) {
 
 /* ================= FINISH ================= */
 function finishGrammar() {
-
   if (typeof showFinish === "function") {
     showFinish("quiz", "Grammar qismi tugadi");
   } else {
@@ -154,4 +155,3 @@ function finishGrammar() {
     `;
   }
 }
-

@@ -5,7 +5,6 @@
 <title>Admin Panel - Imtihon Platforma</title>
 
 <style>
-
 body {
   margin: 0;
   min-height: 100vh;
@@ -307,6 +306,106 @@ body {
   display: block;
 }
 
+/* ================= QUESTIONS MANAGEMENT ================= */
+#questionsPanel {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+  text-align: left;
+}
+
+#questionsPanel h3 {
+  color: #00ffcc;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #00e5ff;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Dynamic fields */
+#dynamicFields {
+  margin-bottom: 15px;
+}
+
+.questions-list {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.questions-list li {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.question-item strong {
+  color: #00ffcc;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.question-item .options {
+  margin: 5px 0;
+  opacity: 0.9;
+}
+
+.question-item .correct {
+  color: #00ffcc;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.question-item button {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #e74c3c;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.question-item button:hover {
+  background: #c0392b;
+}
+
 /* USER INFO */
 #userInfo {
   position: fixed;
@@ -320,8 +419,16 @@ body {
   font-size: 14px;
 }
 
+/* Section specific fields */
+.section-field {
+  display: none;
+}
+
+.section-field.active {
+  display: block;
+}
+
 </style>
-<base target="_blank">
 </head>
 
 <body>
@@ -407,6 +514,137 @@ body {
       <div id="timeControlStatus" class="payment-status" style="display:none;"></div>
     </div>
 
+    <!-- SAVOLLAR BOSHQARUVI -->
+    <div id="questionsPanel">
+      <h3>📝 Savollar boshqaruvi</h3>
+
+      <div class="form-group">
+        <label>Bo'lim:</label>
+        <select id="questionSection" class="form-control" onchange="updateQuestionForm()">
+          <option value="grammar">Grammar</option>
+          <option value="reading">Reading</option>
+          <option value="listening">Listening</option>
+          <option value="writing">Writing</option>
+          <option value="speaking">Speaking</option>
+        </select>
+      </div>
+
+      <!-- GRAMMAR / LISTENING / READING - ASOSIY SAVOL -->
+      <div class="form-group">
+        <label id="questionLabel">Savol matni:</label>
+        <textarea id="questionText" class="form-control" rows="3" placeholder="Savolni kiriting..."></textarea>
+      </div>
+
+      <!-- READING - PASSAGE MATNI -->
+      <div id="readingPassageField" class="section-field">
+        <div class="form-group">
+          <label>O'qish matni (Passage):</label>
+          <textarea id="readingPassage" class="form-control" rows="5" placeholder="Bu yerda o'qish matnini kiriting..."></textarea>
+        </div>
+      </div>
+
+      <!-- LISTENING - AUDIO URL -->
+      <div id="listeningAudioField" class="section-field">
+        <div class="form-group">
+          <label>Audio URL:</label>
+          <input type="text" id="listeningAudio" class="form-control" placeholder="https://example.com/audio.mp3">
+        </div>
+      </div>
+
+      <!-- WRITING - TOPIC & TASK -->
+      <div id="writingFields" class="section-field">
+        <div class="form-group">
+          <label>Mavzu (Topic):</label>
+          <input type="text" id="writingTopic" class="form-control" placeholder="Mavzuni kiriting...">
+        </div>
+        <div class="form-group">
+          <label>Vazifa (Task):</label>
+          <textarea id="writingTask" class="form-control" rows="2" placeholder="Vazifani kiriting..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Level:</label>
+            <select id="writingLevel" class="form-control">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Vaqt (daqiqa):</label>
+            <input type="number" id="writingTime" class="form-control" value="20" min="1" max="120">
+          </div>
+        </div>
+      </div>
+
+      <!-- SPEAKING - DIFFICULTY & TIMER -->
+      <div id="speakingFields" class="section-field">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Qiyinchilik:</label>
+            <select id="speakingDifficulty" class="form-control">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tayyorlanish (sek):</label>
+            <input type="number" id="speakingPrep" class="form-control" value="30" min="5" max="300">
+          </div>
+          <div class="form-group">
+            <label>Javob (sek):</label>
+            <input type="number" id="speakingAnswer" class="form-control" value="60" min="5" max="600">
+          </div>
+        </div>
+      </div>
+
+      <!-- OPTIONS A-D (Grammar/Listening) -->
+      <div id="optionsField" class="section-field active">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Variant A:</label>
+            <input type="text" id="optionA" class="form-control" placeholder="A variant">
+          </div>
+          <div class="form-group">
+            <label>Variant B:</label>
+            <input type="text" id="optionB" class="form-control" placeholder="B variant">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Variant C:</label>
+            <input type="text" id="optionC" class="form-control" placeholder="C variant">
+          </div>
+          <div class="form-group">
+            <label>Variant D:</label>
+            <input type="text" id="optionD" class="form-control" placeholder="D variant">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>To'g'ri javob:</label>
+          <select id="correctAnswer" class="form-control">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="time-btn-group">
+        <button id="btnAddQuestion" onclick="addQuestion()">➕ Savol qo'shish</button>
+        <button onclick="clearAllQuestions()" style="background:#e74c3c;">🗑️ Barchasini tozalash</button>
+      </div>
+
+      <h4 style="color:#00ffcc; margin-top:20px; text-align:center;">Mavjud savollar:</h4>
+      <ul id="questionsList" class="questions-list">
+        <li class="exempt-empty">Yuklanmoqda...</li>
+      </ul>
+    </div>
+
   </div>
 </div>
 
@@ -433,6 +671,49 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 <script src="script.js"></script>
 <script src="admin.js"></script>
+
+<script>
+// Bo'lim o'zgarganda formani yangilash
+function updateQuestionForm() {
+  const section = document.getElementById('questionSection').value;
+  
+  // Hamma maxsus maydonlarni yashirish
+  document.querySelectorAll('.section-field').forEach(el => el.classList.remove('active'));
+  
+  // Label ni o'zgartirish
+  const label = document.getElementById('questionLabel');
+  
+  switch(section) {
+    case 'grammar':
+      label.textContent = 'Savol matni:';
+      document.getElementById('optionsField').classList.add('active');
+      break;
+    case 'reading':
+      label.textContent = 'Savol matni:';
+      document.getElementById('readingPassageField').classList.add('active');
+      document.getElementById('optionsField').classList.add('active');
+      break;
+    case 'listening':
+      label.textContent = 'Savol matni:';
+      document.getElementById('listeningAudioField').classList.add('active');
+      document.getElementById('optionsField').classList.add('active');
+      break;
+    case 'writing':
+      label.textContent = 'Yozish vazifasi:';
+      document.getElementById('writingFields').classList.add('active');
+      break;
+    case 'speaking':
+      label.textContent = 'Gapirish savoli:';
+      document.getElementById('speakingFields').classList.add('active');
+      break;
+  }
+}
+
+// Sahifa yuklanganda formani sozlash
+document.addEventListener('DOMContentLoaded', function() {
+  updateQuestionForm();
+});
+</script>
 
 </body>
 </html>

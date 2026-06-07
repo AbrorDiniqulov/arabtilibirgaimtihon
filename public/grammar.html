@@ -82,8 +82,6 @@
 })();
 </script>
 <base target="_self">
-<base target="_blank">
-<base target="_blank">
 </head>
 
 <body>
@@ -115,43 +113,12 @@
     <textarea id="analyticalEssay" placeholder="Bu yerga javobingizni yozing..." style="font-size: 20px; padding: 18px; border: 2px solid #e0e0e0; border-radius: 12px; background: #f8f9fa; min-height: 180px; resize: vertical; outline: none; transition: all 0.3s ease; font-family: inherit; line-height: 1.6;"></textarea>
     <button class="btn" onclick="submitAnalytical()" style="align-self: flex-end; background: white; color: #764ba2; font-weight: 700; padding: 12px 32px; border-radius: 25px; border: none; cursor: pointer; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">✓ Yuborish</button>
   </div>
-<script>
-// Auto-detect text direction for textarea
-(function() {
-  var essay = document.getElementById('essay');
-  if (!essay) return;
-
-  // Arabic Unicode range (including extended Arabic)
-  var arabicRegex = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
-
-  function checkDirection() {
-    var text = essay.value;
-    // Check if text contains any Arabic character
-    if (arabicRegex.test(text)) {
-      essay.style.direction = 'rtl';
-      essay.style.textAlign = 'right';
-    } else {
-      essay.style.direction = 'ltr';
-      essay.style.textAlign = 'left';
-    }
-  }
-
-  essay.addEventListener('input', checkDirection);
-  essay.addEventListener('keyup', checkDirection);
-  essay.addEventListener('paste', function() {
-    setTimeout(checkDirection, 0);
-  });
-})();
-</script>
 </div>
 
 <!-- FINISH SYSTEM -->
+<script src="admin.js"></script>  <!-- ✅ QuestionsDB uchun -->
 <script src="finish.js"></script>
-
-<!-- TIMER SYSTEM -->
 <script src="script.js"></script>
-
-<!-- GRAMMAR LOGIC -->
 <script src="grammar.js"></script>
 
 <script>
